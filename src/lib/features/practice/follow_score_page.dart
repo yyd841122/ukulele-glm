@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audio/music_utils.dart';
 import '../../core/audio/scoring_engine.dart';
 import '../../core/audio/tone_player.dart';
+import '../../core/game/game_service.dart';
 import '../../core/monetization/feature_gate.dart';
 import '../../core/monetization/monetization_model.dart';
 import '../../core/monetization/paywall_sheet.dart';
@@ -97,6 +98,7 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
   int _restCountdown = 0; // 休息倒计时
   Timer? _restTimer;
   final List<int> _roundScores = []; // 每轮得分
+  int _totalExpGained = 0; // 本次练习累计获得 EXP
   bool _loopDone = false; // 全部轮次完成
 
   List<PracticeItem> get _items =>
@@ -180,6 +182,7 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
       _loopDone = false;
       _currentRound = 0;
       _roundScores.clear();
+      _totalExpGained = 0;
     });
     await _startRound();
   }
@@ -212,6 +215,14 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
     if (_resting || _loopDone) return; // 防重复触发
     final score = state.pitchScore;
     _roundScores.add(score);
+
+    // 上报游戏化系统：获得 EXP（每轮都算一次练习）
+    final exp = ref.read(gameProvider.notifier).reportPractice(PracticeResult(
+      score: score,
+      durationSeconds: _items.length * (60000 * 2 ~/ _bpm) ~/ 1000,
+      songCompleted: true,
+    ));
+    _totalExpGained += exp;
 
     // 是否还有下一轮？_rounds=0 表示无限循环
     final hasMore = _rounds == 0 || (_currentRound + 1 < _rounds);
@@ -356,6 +367,7 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
             if (_loopDone)
               _LoopReport(
                 scores: _roundScores,
+                expGained: _totalExpGained,
                 onRetry: () {
                   setState(() {
                     _loopDone = false;
@@ -1237,8 +1249,9 @@ class _RestView extends StatelessWidget {
 /// 全部轮次完成：汇总报告
 class _LoopReport extends StatelessWidget {
   final List<int> scores; // 每轮得分
+  final int expGained; // 本次获得的总 EXP
   final VoidCallback onRetry;
-  const _LoopReport({required this.scores, required this.onRetry});
+  const _LoopReport({required this.scores, required this.expGained, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -1259,6 +1272,26 @@ class _LoopReport extends StatelessWidget {
             const SizedBox(height: 6),
             Text('共 ${scores.length} 轮',
                 style: const TextStyle(color: AppColors.text3, fontSize: 13)),
+            const SizedBox(height: 8),
+            // EXP 收益提示
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.teal.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppColors.teal.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('✨', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 6),
+                  Text('获得 $expGained 经验值',
+                      style: const TextStyle(
+                          color: AppColors.teal, fontSize: 14, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
             const SizedBox(height: 24),
             // 平均分环
             SizedBox(

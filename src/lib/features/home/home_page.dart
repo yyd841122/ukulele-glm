@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/game/game_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../practice/tuner_page.dart';
 import '../practice/chord_library_page.dart';
@@ -11,17 +12,16 @@ import '../songs/song_model.dart';
 import '../songs/song_detail_page.dart';
 import '../songs/songs_page.dart';
 
-/// 模拟连续打卡天数（MVP 本地，Phase2 接打卡 provider）
-final _streakProvider = StateProvider<int>((ref) => 7);
-final _todayMinutesProvider = StateProvider<int>((ref) => 12);
+/// 首页用真实游戏化数据（连续打卡天数、等级）
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final streak = ref.watch(_streakProvider);
-    final minutes = ref.watch(_todayMinutesProvider);
+    final game = ref.watch(gameProvider);
+    final streak = game.currentStreak;
+    final minutes = game.totalPracticeSeconds ~/ 60;
 
     return Scaffold(
       body: SingleChildScrollView(
