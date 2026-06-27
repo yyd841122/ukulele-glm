@@ -42,3 +42,5 @@ flutter:
 
   assets:
     - assets/sounds/
+    - assets/sounds/tones/
+    - assets/sounds/strum/

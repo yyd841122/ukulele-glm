@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../practice/tuner_page.dart';
+import '../practice/chord_library_page.dart';
 import '../songs/song_model.dart';
 import '../songs/song_detail_page.dart';
+import '../songs/songs_page.dart';
 
 /// 模拟连续打卡天数（MVP 本地，Phase2 接打卡 provider）
 final _streakProvider = StateProvider<int>((ref) => 7);
@@ -135,9 +137,12 @@ class HomePage extends ConsumerWidget {
                 children: [
                   _quickTool(context, '🎼', '调音器', () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const TunerPage()))),
-                  _quickTool(context, '🎯', '练一练', () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('音准练习见「曲谱→任一入门曲目→跟弹评分」')))),
-                  _quickTool(context, '📚', '曲谱库', () {}),
-                  _quickTool(context, '🎵', '和弦', () {}),
+                  _quickTool(context, '📚', '曲谱库', () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const SongsPage()))),
+                  _quickTool(context, '🎵', '和弦', () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const ChordLibraryPage()))),
+                  _quickTool(context, '🎯', '练一练', () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const SongsPage()))),
                 ],
               ),
             ),
