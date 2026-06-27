@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尤克里里 AI 学园 · 高保真原型</title>
+<style>
+/* ============ 基础重置 ============ */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root{
+  --orange:#FF8A3D; --orange-d:#FF6B2C; --teal:#2DD4BF;
+  --grad:linear-gradient(135deg,#FF8A3D,#FF6B2C);
+  --grad-island:linear-gradient(135deg,#FF8A3D,#2DD4BF);
+  --ok:#22C55E; --warn:#F59E0B; --err:#EF4444; --info:#3B82F6;
+  --t1:#1F2937; --t2:#6B7280; --t3:#9CA3AF;
+  --line:#E5E7EB; --bg:#F9FAFB; --card:#FFFFFF;
+  --r-card:16px; --r-btn:12px;
+  --sh-card:0 2px 12px rgba(0,0,0,.06);
+  --sh-fab:0 8px 24px rgba(255,107,44,.30);
+}
+html,body{ font-family:"PingFang SC","HarmonyOS Sans","Microsoft YaHei",system-ui,sans-serif;
+  background:linear-gradient(135deg,#e0e7ff,#fef3c7); min-height:100vh; color:var(--t1); }
+
+/* ============ 手机外框（桌面居中） ============ */
+.stage{ display:flex; justify-content:center; align-items:flex-start; padding:24px 0; min-height:100vh; }
+.phone{
+  position:relative; width:375px; height:760px; background:var(--bg);
+  border-radius:42px; overflow:hidden;
+  box-shadow:0 30px 70px rgba(0,0,0,.25), 0 0 0 11px #111, 0 0 0 13px #333;
+}
+@media (max-width:480px){
+  .stage{ padding:0; }
+  .phone{ width:100vw; height:100vh; border-radius:0; box-shadow:none; }
+}
+/* 顶部状态栏 */
+.statusbar{ height:44px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 22px; font-size:14px; font-weight:600; position:relative; z-index:5; }
+.statusbar.dark{ color:#fff; }
+.statusbar .right{ display:flex; gap:6px; align-items:center; font-size:12px; }
+
+/* ============ 页面容器 ============ */
+.pages{ position:absolute; inset:0; overflow:hidden; }
+.page{ position:absolute; inset:0; overflow-y:auto; padding-bottom:88px;
+  opacity:0; pointer-events:none; transform:translateX(20px); transition:opacity .25s ease, transform .25s ease; }
+.page.active{ opacity:1; pointer-events:auto; transform:translateX(0); }
+.page::-webkit-scrollbar{ display:none; }
+
+/* ============ 底部 Tab ============ */
+.tabbar{ position:absolute; bottom:0; left:0; right:0; height:72px; background:rgba(255,255,255,.96);
+  backdrop-filter:blur(12px); border-top:1px solid var(--line); display:flex; padding-bottom:12px; z-index:50; }
+.tab{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  color:var(--t3); font-size:10px; cursor:pointer; transition:color .2s; }
+.tab .ic{ font-size:22px; line-height:1; }
+.tab.active{ color:var(--orange); }
+.tab.active .ic{ transform:translateY(-1px); }
+
+/* ============ 通用 ============ */
+.section{ padding:16px; }
+.h-title{ display:flex; align-items:center; justify-content:space-between; margin:18px 16px 12px; }
+.h-title h2{ font-size:18px; }
+.h-title .more{ font-size:13px; color:var(--t2); }
+.chip{ display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px;
+  font-size:12px; background:#FFF1E6; color:var(--orange-d); }
+.card{ background:var(--card); border-radius:var(--r-card); box-shadow:var(--sh-card); padding:16px; }
+.btn{ border:none; cursor:pointer; font-family:inherit; font-weight:600; transition:transform .12s, opacity .2s; }
+.btn:active{ transform:scale(.96); }
+.btn-primary{ background:var(--grad); color:#fff; height:48px; border-radius:999px;
+  width:100%; font-size:16px; box-shadow:var(--sh-fab); }
+.btn-ghost{ background:#FFF1E6; color:var(--orange-d); height:40px; border-radius:var(--r-btn); padding:0 16px; font-size:14px; }
+
+/* ============ 首页 ============ */
+.hero{ background:var(--grad); color:#fff; padding:8px 16px 26px; border-radius:0 0 28px 28px; position:relative; }
+.hero .hi{ font-size:13px; opacity:.9; margin-top:4px; }
+.hero .name{ font-size:22px; font-weight:700; margin-top:2px; }
+.hero .sub{ font-size:13px; opacity:.92; margin-top:4px; }
+/* 打卡卡 */
+.checkin{ margin:-22px 16px 0; background:#fff; border-radius:var(--r-card); box-shadow:var(--sh-card);
+  padding:14px 16px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:3; }
+.checkin .ci-l b{ font-size:16px; } .checkin .ci-l span{ font-size:12px; color:var(--t2); display:block; }
+.streak{ display:flex; gap:6px; }
+.streak .day{ width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:11px; font-weight:700; background:#F3F4F6; color:var(--t3); }
+.streak .day.done{ background:var(--grad); color:#fff; }
+.streak .day.now{ background:var(--warn); color:#fff; box-shadow:0 0 0 3px #FEF3C7; }
+/* 快捷工具宫格 */
+.grid-tools{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:18px 16px; }
+.gt{ background:#fff; border-radius:var(--r-card); box-shadow:var(--sh-card); padding:14px 6px; text-align:center; cursor:pointer; transition:transform .12s; }
+.gt:active{ transform:scale(.95); }
+.gt .e{ font-size:26px; } .gt .t{ font-size:11px; color:var(--t2); margin-top:4px; }
+/* 继续学习 */
+.continue{ margin:0 16px; background:var(--grad-island); border-radius:var(--r-card); color:#fff;
+  padding:16px; display:flex; align-items:center; gap:14px; box-shadow:var(--sh-card); cursor:pointer; }
+.continue .cv{ width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:30px; }
+.continue .ci{ flex:1; } .continue .ci b{ font-size:15px; } .continue .ci p{ font-size:12px; opacity:.9; margin-top:3px; }
+.continue .pbar{ height:5px;border-radius:3px;background:rgba(255,255,255,.3);margin-top:8px;overflow:hidden; }
+.continue .pbar i{ display:block;height:100%;width:60%;background:#fff;border-radius:3px; }
+.continue .play{ width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);color:var(--orange-d);
+  display:flex;align-items:center;justify-content:center;font-size:16px; }
+/* 曲目横滑 */
+.scrollx{ display:flex; gap:12px; overflow-x:auto; padding:0 16px 4px; scroll-snap-type:x mandatory; }
+.scrollx::-webkit-scrollbar{ display:none; }
+.song-card{ min-width:120px; scroll-snap-align:start; cursor:pointer; }
+.song-card .cover{ width:120px;height:120px;border-radius:14px;display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:8px; font-size:28px; box-shadow:var(--sh-card); }
+.song-card .ti{ font-size:13px; font-weight:600; margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.song-card .ar{ font-size:11px; color:var(--t2); }
+.stars{ font-size:10px; color:var(--warn); }
+/* 榜单 */
+.rank-row{ display:flex; align-items:center; gap:12px; padding:10px 16px; cursor:pointer; }
+.rank-row .no{ width:22px; font-weight:800; color:var(--orange); text-align:center; }
+.rank-row .cv{ width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px; }
+.rank-row .info{ flex:1; } .rank-row .info b{ font-size:14px; } .rank-row .info p{ font-size:11px; color:var(--t2); }
+.rank-row .ht{ font-size:12px; color:var(--t3); }
+
+/* ============ 学习页 ============ */
+.tabs-p{ display:flex; gap:8px; padding:12px 16px; }
+.tabs-p .tp{ padding:7px 16px; border-radius:999px; font-size:13px; background:#fff; color:var(--t2);
+  box-shadow:var(--sh-card); cursor:pointer; }
+.tabs-p .tp.active{ background:var(--grad); color:#fff; }
+.course-card{ margin:0 16px 12px; background:#fff; border-radius:var(--r-card); box-shadow:var(--sh-card);
+  overflow:hidden; cursor:pointer; display:flex; }
+.course-card .cc-l{ width:96px; display:flex; align-items:center; justify-content:center; font-size:38px; }
+.course-card .cc-r{ flex:1; padding:14px 14px 14px 0; }
+.course-card .cc-r .tag{ font-size:10px; color:var(--teal); font-weight:700; }
+.course-card .cc-r h3{ font-size:15px; margin:3px 0 4px; }
+.course-card .cc-r p{ font-size:12px; color:var(--t2); }
+.course-card .cc-r .meta{ display:flex; gap:10px; font-size:11px; color:var(--t3); margin-top:8px; align-items:center; }
+.pill{ width:60px;height:6px;border-radius:3px;background:#F3F4F6;overflow:hidden; }
+.pill i{ display:block;height:100%;background:var(--grad); }
+
+/* ============ 练琴页 ============ */
+.tool-hero{ background:var(--grad); color:#fff; padding:14px 16px 60px; }
+.tool-hero h1{ font-size:20px; } .tool-hero p{ font-size:13px; opacity:.9; margin-top:4px; }
+.tool-grid{ margin:-48px 16px 0; display:grid; grid-template-columns:1fr 1fr; gap:12px; position:relative; z-index:3; }
+.tg{ background:#fff;border-radius:var(--r-card);box-shadow:var(--sh-card);padding:18px 14px;cursor:pointer;transition:transform .12s; min-height:120px; display:flex;flex-direction:column;justify-content:space-between; }
+.tg:active{ transform:scale(.96); }
+.tg.feat{ grid-column:span 2; background:var(--grad-island); color:#fff; flex-direction:row; align-items:center; }
+.tg.feat .e{ font-size:46px; } .tg.feat .tx b{ font-size:17px; } .tg.feat .tx p{ font-size:12px; opacity:.92; margin-top:3px; }
+.tg .e{ font-size:30px; } .tg .tx b{ font-size:14px; display:block; }
+.tg .tx p{ font-size:11px; color:var(--t2); margin-top:3px; }
+.tg.feat .tx p{ color:rgba(255,255,255,.92); }
+
+/* ============ 曲谱页 ============ */
+.search{ margin:12px 16px; background:#fff; border-radius:999px; box-shadow:var(--sh-card);
+  padding:11px 16px; display:flex; align-items:center; gap:10px; color:var(--t3); font-size:14px; }
+.filter-x{ display:flex; gap:8px; padding:0 16px 8px; overflow-x:auto; }
+.filter-x::-webkit-scrollbar{ display:none; }
+.filter-x .fx{ white-space:nowrap; padding:6px 14px; border-radius:999px; font-size:12px;
+  background:#fff; color:var(--t2); box-shadow:var(--sh-card); cursor:pointer; }
+.filter-x .fx.active{ background:var(--grad); color:#fff; }
+.song-row{ display:flex; align-items:center; gap:12px; padding:10px 16px; cursor:pointer; }
+.song-row:active{ background:#f3f4f6; }
+.song-row .cv{ width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px; }
+.song-row .info{ flex:1; min-width:0; }
+.song-row .info b{ font-size:14px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.song-row .info p{ font-size:11px; color:var(--t2); }
+.song-row .dif{ font-size:11px; color:var(--t3); }
+
+/* ============ 我的页 ============ */
+.me-hero{ background:var(--grad); color:#fff; padding:10px 16px 70px; text-align:center; }
+.me-hero .av{ width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);
+  display:inline-flex;align-items:center;justify-content:center;font-size:36px; margin-top:6px; }
+.me-hero .nm{ font-size:18px; font-weight:700; margin-top:8px; }
+.me-hero .lv{ display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,.22);
+  padding:3px 12px; border-radius:999px; font-size:12px; margin-top:6px; }
+.expbar{ height:7px;border-radius:4px;background:rgba(255,255,255,.3);margin:10px 40px 0; }
+.expbar i{ display:block;height:100%;width:68%;background:#fff;border-radius:4px; }
+.stat-grid{ margin:-56px 16px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; position:relative; z-index:3; }
+.stat{ background:#fff;border-radius:var(--r-card);box-shadow:var(--sh-card);padding:14px 8px;text-align:center; }
+.stat .n{ font-size:22px; font-weight:800; color:var(--orange-d); }
+.stat .l{ font-size:11px; color:var(--t2); margin-top:2px; }
+.cal-card{ margin:16px; background:#fff;border-radius:var(--r-card);box-shadow:var(--sh-card);padding:16px; }
+.cal-card .ct{ display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
+.cal-card .ct b{ font-size:15px; } .cal-card .ct span{ font-size:12px; color:var(--teal); }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+.cal-grid .d{ aspect-ratio:1; border-radius:6px; background:#F3F4F6; display:flex;align-items:center;justify-content:center; font-size:9px; color:var(--t3); }
+.cal-grid .d.on{ background:var(--grad); color:#fff; }
+.cal-grid .d.today{ box-shadow:0 0 0 2px var(--orange); }
+.ach{ margin:0 16px 16px; }
+.ach .row{ display:flex; gap:14px; overflow-x:auto; padding-bottom:4px; }
+.ach .row::-webkit-scrollbar{ display:none; }
+.ach .am{ text-align:center; }
+.ach .am .mm{ width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px; background:var(--grad-island); color:#fff; box-shadow:var(--sh-card); }
+.ach .am .ll{ font-size:11px; color:var(--t2); margin-top:4px; max-width:64px; }
+.ach .am.lock .mm{ background:#E5E7EB; color:#9CA3AF; filter:grayscale(1); }
+.menu{ margin:0 16px 16px; background:#fff;border-radius:var(--r-card);box-shadow:var(--sh-card);overflow:hidden; }
+.menu .mi{ display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer; font-size:14px; }
+.menu .mi:last-child{ border-bottom:none; }
+.menu .mi .e{ font-size:18px; } .menu .mi .tx{ flex:1; } .menu .mi .ar{ color:var(--t3); }
+
+/* ============ 曲谱详情 ============ */
+.detail{ position:absolute; inset:0; background:#fff; z-index:100; transform:translateX(100%);
+  transition:transform .3s ease; overflow-y:auto; }
+.detail.show{ transform:translateX(0); }
+.detail-head{ background:var(--grad); color:#fff; padding:14px 16px 20px; }
+.detail-head .back{ font-size:20px; cursor:pointer; }
+.detail-head h2{ font-size:20px; margin:10px 0 4px; }
+.detail-head p{ font-size:13px; opacity:.9; }
+.detail-head .key{ display:flex; gap:8px; margin-top:10px; font-size:12px; }
+.detail-head .key span{ background:rgba(255,255,255,.22); padding:3px 10px; border-radius:999px; }
+.player-area{ padding:16px; }
+.play-ctrl{ display:flex; align-items:center; justify-content:space-around; padding:12px; background:#FFF7ED;
+  border-radius:var(--r-card); margin-bottom:16px; }
+.play-ctrl .pc{ text-align:center; } .play-ctrl .pc .e{ font-size:24px; cursor:pointer; }
+.play-ctrl .pc .l{ font-size:10px; color:var(--t2); margin-top:2px; }
+.play-ctrl .pc.big .e{ font-size:44px; color:var(--orange); }
+.lyrics{ font-size:15px; line-height:2.4; }
+.lyrics .ln{ position:relative; padding:2px 0; }
+.lyrics .ln.now{ background:linear-gradient(90deg,#FFF3E0,transparent); border-radius:6px; padding-left:6px; }
+.chord{ display:inline-block; min-width:20px; text-align:center; background:var(--orange); color:#fff;
+  font-size:12px; font-weight:700; padding:1px 5px; border-radius:5px; margin-bottom:4px; vertical-align:bottom; }
+.follow-bar{ position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line); padding:12px 16px;
+  display:flex; gap:10px; }
+.follow-bar .btn-primary{ flex:1; }
+
+/* ============ 调音器独立页 ============ */
+.tuner{ position:absolute; inset:0; background:linear-gradient(180deg,#1F2937,#111827); color:#fff;
+  z-index:100; transform:translateX(100%); transition:transform .3s ease; overflow-y:auto; }
+.tuner.show{ transform:translateX(0); }
+.tuner .th{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; }
+.tuner .th .back{ font-size:20px; cursor:pointer; }
+.tuner .th b{ font-size:17px; }
+.tuner .th .mode{ font-size:12px; background:rgba(255,255,255,.1); padding:4px 10px; border-radius:999px; cursor:pointer; }
+/* 表盘 */
+.dial-wrap{ display:flex; flex-direction:column; align-items:center; padding:10px 0 0; }
+.dial{ position:relative; width:260px; height:260px; }
+.dial svg{ width:100%; height:100%; transform:rotate(0deg); }
+.dial .needle{ position:absolute; left:50%; top:50%; width:4px; height:110px; background:var(--err);
+  transform-origin:bottom center; transform:translate(-50%,-100%) rotate(0deg); border-radius:4px;
+  transition:transform .12s ease-out, background .2s; z-index:3; }
+.dial .needle.ok{ background:var(--ok); }
+.dial-center{ position:absolute; left:50%; top:50%; transform:translate(-50%,-40%);
+  text-align:center; z-index:2; }
+.dial-center .note{ font-size:64px; font-weight:800; line-height:1; }
+.dial-center .oct{ font-size:18px; color:var(--t3); }
+.dial-center .hz{ font-size:12px; color:var(--t3); margin-top:4px; }
+.dial-center .status{ font-size:13px; margin-top:8px; font-weight:600; height:18px; }
+.dial-center .status.ok{ color:var(--ok); } .dial-center .status.lo{ color:#60A5FA; } .dial-center .status.hi{ color:#F87171; }
+.cents-box{ font-size:13px; color:var(--t3); margin-top:6px; }
+/* 4 弦 */
+.strings{ display:flex; justify-content:center; gap:14px; margin:20px 0 4px; }
+.strings .str{ display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+.strings .str .b{ width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; border:2px solid transparent; transition:.2s; }
+.strings .str.on .b{ border-color:var(--orange); background:rgba(255,138,61,.18); box-shadow:0 0 0 4px rgba(255,138,61,.15); }
+.strings .str.ok .b{ border-color:var(--ok); color:var(--ok); }
+.strings .str .lbl{ font-size:10px; color:var(--t3); }
+.tuner-tip{ text-align:center; font-size:12px; color:var(--t3); padding:0 32px; line-height:1.7; margin-top:8px; }
+.tuner-act{ padding:20px 24px 32px; }
+.tuner-act .btn-primary{ background:var(--grad); }
+.tuner-act .btn-primary.active{ background:linear-gradient(135deg,#EF4444,#DC2626); }
+.tuner-note{ font-size:12px; color:var(--t3); text-align:center; margin-top:10px; line-height:1.6; }
+.perm-overlay{ position:absolute; inset:0; background:rgba(0,0,0,.85); z-index:120;
+  display:none; align-items:center; justify-content:center; padding:32px; }
+.perm-overlay.show{ display:flex; }
+.perm-card{ background:#fff; color:var(--t1); border-radius:20px; padding:28px 24px; text-align:center; max-width:280px; }
+.perm-card .e{ font-size:48px; } .perm-card h3{ font-size:18px; margin:12px 0 8px; }
+.perm-card p{ font-size:13px; color:var(--t2); line-height:1.6; }
+.perm-card .btn{ margin-top:18px; }
+
+/* badge 提示 */
+.toast{ position:absolute; top:60px; left:50%; transform:translate(-50%,-20px); background:rgba(0,0,0,.85);
+  color:#fff; padding:10px 20px; border-radius:999px; font-size:13px; z-index:200; opacity:0; pointer-events:none; transition:.3s; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="phone">
+  <div class="statusbar" id="statusbar">
+    <span>9:41</span>
+    <span class="right">🔒 5G ▮▮▮ 100%</span>
+  </div>
+
+  <div class="pages">
+
+    <!-- ========== 首页 ========== -->
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="hi">☀️ 早上好</div>
+        <div class="name">练琴时间到啦 🎸</div>
+        <div class="sub">今天也要开心弹琴哦～</div>
+      </div>
+
+      <div class="checkin">
+        <div class="ci-l">
+          <b>连续打卡 <span style="color:var(--orange-d)">7</span> 天 🔥</b>
+          <span>今日已练习 12 分钟 · 目标 15 分钟</span>
+        </div>
+        <div class="streak">
+          <div class="day done">一</div>
+          <div class="day done">二</div>
+          <div class="day done">三</div>
+          <div class="day done">四</div>
+          <div class="day done">五</div>
+          <div class="day done">六</div>
+          <div class="day now">日</div>
+        </div>
+      </div>
+
+      <div class="grid-tools">
+        <div class="gt" onclick="openTuner()"><div class="e">🎼</div><div class="t">调音器</div></div>
+        <div class="gt" onclick="toast('节拍器 · MVP 功能')"><div class="e">⏱️</div><div class="t">节拍器</div></div>
+        <div class="gt" onclick="go('practice')"><div class="e">🎵</div><div class="t">和弦库</div></div>
+        <div class="gt" onclick="toast('今日练习 · MVP 功能')"><div class="e">🎯</div><div class="t">练一练</div></div>
+      </div>
+
+      <div class="continue" onclick="openDetail('song1')">
+        <div class="cv">🎤</div>
+        <div class="ci">
+          <b>继续学习：《小幸运》弹唱</b>
+          <p>已学 60% · 下一步：副歌扫弦</p>
+          <div class="pbar"><i></i></div>
+        </div>
+        <div class="play">▶</div>
+      </div>
+
+      <div class="h-title"><h2>🔥 热门弹唱</h2><span class="more">更多 ›</span></div>
+      <div class="scrollx" id="hot-songs"></div>
+
+      <div class="h-title"><h2>🏆 练琴榜单</h2><span class="more">全部 ›</span></div>
+      <div id="rank-list"></div>
+    </section>
+
+    <!-- ========== 学习页 ========== -->
+    <section class="page" id="page-learn">
+      <div class="hero" style="border-radius:0">
+        <div class="name" style="font-size:20px">🎓 互动课程</div>
+        <div class="sub">跟着 AI 私教，7 天弹唱第一首歌</div>
+      </div>
+      <div class="tabs-p">
+        <div class="tp active" onclick="switchLearnTab(this,'必修课')">必修课</div>
+        <div class="tp" onclick="switchLearnTab(this,'选修课')">选修课</div>
+        <div class="tp" onclick="switchLearnTab(this,'Pro课')">Pro 课</div>
+      </div>
+      <div id="course-list"></div>
+    </section>
+
+    <!-- ========== 练琴页 ========== -->
+    <section class="page" id="page-practice">
+      <div class="tool-hero">
+        <h1>🎸 练琴工具</h1>
+        <p>调好琴、找好谱、随时开练</p>
+      </div>
+      <div class="tool-grid">
+        <div class="tg feat" onclick="openTuner()">
+          <div class="e">🎼</div>
+          <div class="tx"><b>智能调音器</b><p>麦克风实时听音 · 精准到 ±1 音分</p></div>
+        </div>
+        <div class="tg" onclick="toast('节拍器 · MVP 功能')"><div><div class="e">⏱️</div></div><div class="tx"><b>节拍器</b><p>40-240 BPM</p></div></div>
+        <div class="tg" onclick="toast('和弦库 · MVP 功能')"><div><div class="e">🎵</div></div><div class="tx"><b>和弦库</b><p>指法图+听音</p></div></div>
+        <div class="tg" onclick="toast('节奏练习 · V1 功能')"><div><div class="e">🥁</div></div><div class="tx"><b>节奏练习</b><p>扫弦节奏型</p></div></div>
+        <div class="tg" onclick="toast('和弦转换 · V1 功能')"><div><div class="e">🔁</div></div><div class="tx"><b>和弦转换</b><p>提速训练</p></div></div>
+      </div>
+
+      <div class="h-title"><h2>🎯 今日推荐练习</h2></div>
+      <div class="section" style="padding-top:0">
+        <div class="card" onclick="toast('音准练习 · MVP 功能')" style="display:flex;align-items:center;gap:14px;cursor:pointer">
+          <div style="font-size:34px">🎯</div>
+          <div style="flex:1"><b style="font-size:15px">音准跟弹练习</b><p style="font-size:12px;color:var(--t2);margin-top:3px">弹对得分，像打地鼠一样有趣</p></div>
+          <div style="color:var(--orange)">▶</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 曲谱页 ========== -->
+    <section class="page" id="page-songs">
+      <div class="hero" style="border-radius:0;padding-bottom:16px">
+        <div class="name" style="font-size:20px">🎼 曲谱库</div>
+        <div class="sub">海量尤克里里谱，边弹边唱</div>
+      </div>
+      <div class="search">🔍 搜索歌名 / 歌手 / 和弦</div>
+      <div class="filter-x" id="filter-x">
+        <div class="fx active">全部</div>
+        <div class="fx">⭐ 入门</div>
+        <div class="fx">⭐⭐⭐ 进阶</div>
+        <div class="fx">⭐⭐⭐⭐⭐ 指弹</div>
+        <div class="fx">流行</div>
+        <div class="fx">民谣</div>
+      </div>
+      <div id="song-list"></div>
+    </section>
+
+    <!-- ========== 我的页 ========== -->
+    <section class="page" id="page-me">
+      <div class="me-hero">
+        <div class="av">🧑</div>
+        <div class="nm">尤克里里爱好者</div>
+        <div class="lv">⭐ Lv.5 弹唱新手 · 680/1000 EXP</div>
+        <div class="expbar"><i></i></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="n">23</div><div class="l">练习小时</div></div>
+        <div class="stat"><div class="n">8</div><div class="l">弹过曲目</div></div>
+        <div class="stat"><div class="n">12</div><div class="l">掌握和弦</div></div>
+      </div>
+
+      <div class="cal-card">
+        <div class="ct"><b>📅 打卡日历</b><span>本月已练 18 天</span></div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <div class="h-title"><h2>🏅 成就墙</h2><span class="more">3/12</span></div>
+      <div class="ach"><div class="row" id="ach-row"></div></div>
+
+      <div class="menu">
+        <div class="mi" onclick="openMember()"><span class="e">👑</span><span class="tx" style="font-weight:600">会员中心</span><span class="ar" style="color:var(--orange-d);font-weight:600">开通永久会员 ›</span></div>
+        <div class="mi" onclick="toast('学习目标 · V1 功能')"><span class="e">🎯</span><span class="tx">学习目标</span><span class="ar">每日 15min ›</span></div>
+        <div class="mi" onclick="toast('设置 · MVP 功能')"><span class="e">⚙️</span><span class="tx">设置</span><span class="ar">乐器/音频校准 ›</span></div>
+        <div class="mi" onclick="toast('帮助与反馈')"><span class="e">💬</span><span class="tx">帮助与反馈</span><span class="ar">›</span></div>
+      </div>
+    </section>
+
+  </div><!-- /pages -->
+
+  <!-- 底部 Tab -->
+  <div class="tabbar">
+    <div class="tab active" data-page="home" onclick="go('home')"><span class="ic">🏠</span><span>首页</span></div>
+    <div class="tab" data-page="learn" onclick="go('learn')"><span class="ic">🎓</span><span>学习</span></div>
+    <div class="tab" data-page="practice" onclick="go('practice')"><span class="ic">🎸</span><span>练琴</span></div>
+    <div class="tab" data-page="songs" onclick="go('songs')"><span class="ic">🎼</span><span>曲谱</span></div>
+    <div class="tab" data-page="me" onclick="go('me')"><span class="ic">👤</span><span>我的</span></div>
+  </div>
+
+  <!-- 曲谱详情 -->
+  <div class="detail" id="detail">
+    <div class="detail-head">
+      <div class="back" onclick="closeDetail()">‹</div>
+      <h2 id="d-title">小幸运</h2>
+      <p id="d-artist">田馥甄 · 弹唱版</p>
+      <div class="key"><span>Key: C</span><span>BPM: 72</span><span>⭐⭐ 入门</span><span>4/4</span></div>
+    </div>
+    <div class="player-area">
+      <div class="play-ctrl">
+        <div class="pc" onclick="toast('变速')"><div class="e">🐢</div><div class="l">0.8x</div></div>
+        <div class="pc big" onclick="togglePlay()"><div class="e" id="play-icon">▶</div><div class="l" id="play-label">播放</div></div>
+        <div class="pc" onclick="toast('变调')"><div class="e">🔊</div><div class="l">原调</div></div>
+        <div class="pc" onclick="toast('AB循环')"><div class="e">🔁</div><div class="l">循环</div></div>
+      </div>
+      <div class="lyrics" id="lyrics"></div>
+    </div>
+    <div class="follow-bar">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px;text-align:center">🟡 免费用户每日可评分 <b style="color:var(--orange-d)">3</b> 次 · 今日剩 0 次</div>
+      <button class="btn btn-primary" onclick="showPaywall('跟弹评分','今日免费评分次数已用完，开通会员解锁无限次 AI 实时评分')">🎤 开启跟弹评分</button>
+    </div>
+  </div>
+
+  <!-- 调音器 -->
+  <div class="tuner" id="tuner">
+    <div class="th">
+      <div class="back" onclick="closeTuner()">‹</div>
+      <b>🎼 智能调音器</b>
+      <div class="mode" id="g-mode" onclick="toggleGMode()">High-G</div>
+    </div>
+
+    <div class="dial-wrap">
+      <div class="dial">
+        <!-- 表盘 SVG -->
+        <svg viewBox="0 0 260 260">
+          <defs>
+            <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#FF8A3D"/><stop offset="1" stop-color="#2DD4BF"/>
+            </linearGradient>
+          </defs>
+          <!-- 弧形背景 -->
+          <path d="M 40 200 A 100 100 0 1 1 220 200" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="22" stroke-linecap="round"/>
+          <!-- 刻度 -->
+          <g id="ticks"></g>
+          <!-- 左右分区色 -->
+          <path d="M 40 200 A 100 100 0 0 1 110 50" fill="none" stroke="rgba(96,165,250,.5)" stroke-width="22" stroke-linecap="round"/>
+          <path d="M 150 50 A 100 100 0 0 1 220 200" fill="none" stroke="rgba(248,113,113,.5)" stroke-width="22" stroke-linecap="round"/>
+          <!-- 中间绿色达标区 -->
+          <path d="M 118 51 A 100 100 0 0 1 142 51" fill="none" stroke="#22C55E" stroke-width="22" stroke-linecap="round"/>
+        </svg>
+        <div class="needle" id="needle"></div>
+        <div class="dial-center">
+          <div class="note" id="t-note">—</div>
+          <div class="oct" id="t-oct"></div>
+          <div class="hz" id="t-hz">弹响琴弦开始调音</div>
+          <div class="status" id="t-status"></div>
+        </div>
+      </div>
+      <div class="cents-box" id="t-cents"></div>
+    </div>
+
+    <div class="strings" id="strings">
+      <div class="str on" data-note="G" data-oct="4" onclick="selString(this)"><div class="b">G</div><div class="lbl">4弦</div></div>
+      <div class="str" data-note="C" data-oct="4" onclick="selString(this)"><div class="b">C</div><div class="lbl">3弦</div></div>
+      <div class="str" data-oct="4" data-note="E" onclick="selString(this)"><div class="b">E</div><div class="lbl">2弦</div></div>
+      <div class="str" data-note="A" data-oct="4" onclick="selString(this)"><div class="b">A</div><div class="lbl">1弦</div></div>
+    </div>
+
+    <div class="tuner-tip">📋 标准调音（High-G）：<b>G4 - C4 - E4 - A4</b><br>4 弦→1 弦由粗到细，请依次弹响单弦</div>
+
+    <div class="tuner-act">
+      <button class="btn btn-primary" id="tuner-btn" onclick="toggleTuner()">🎤 开始调音</button>
+      <div class="tuner-note">点击后请允许使用麦克风 · 本原型用 <b>YIN 算法</b>在浏览器本地实时识别音高</div>
+    </div>
+
+    <div class="perm-overlay" id="perm-overlay">
+      <div class="perm-card">
+        <div class="e">🎤</div>
+        <h3>需要麦克风权限</h3>
+        <p>调音器需要使用麦克风来听你弹奏的声音并识别音高，仅在本页面本地处理，不会录音上传。</p>
+        <button class="btn btn-primary" onclick="hidePerm()">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 会员中心页 ========== -->
+  <div class="detail" id="member-page" style="background:var(--bg)">
+    <div class="detail-head" style="background:linear-gradient(135deg,#7C3AED,#FF8A3D);padding-bottom:24px">
+      <div class="back" onclick="closeMember()">‹</div>
+      <h2 style="margin-top:6px">👑 会员中心</h2>
+      <p style="font-size:13px;opacity:.92">解锁全部课程 · 曲谱 · 无限 AI 评分</p>
+    </div>
+
+    <!-- 权益对比矩阵 -->
+    <div style="padding:16px">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:14px 16px;font-weight:700;font-size:15px;border-bottom:1px solid var(--line)">📊 权益对比</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:#FFF7ED">
+              <th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--t2)">功能</th>
+              <th style="padding:10px 4px;font-weight:600;color:var(--t2)">免费</th>
+              <th style="padding:10px 4px;font-weight:700;color:var(--orange-d)">👑 永久</th>
+            </tr>
+          </thead>
+          <tbody id="member-benefits"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 套餐卡 -->
+    <div style="padding:0 16px 8px">
+      <div style="text-align:center;margin:4px 0 14px">
+        <div style="font-size:13px;color:var(--t2)">🎉 限时活动 · 永久会员一次买断</div>
+        <div style="margin-top:10px;display:flex;align-items:flex-end;justify-content:center;gap:6px">
+          <span style="font-size:14px;color:var(--orange-d)">¥</span>
+          <span style="font-size:44px;font-weight:800;color:var(--orange-d);line-height:1">99</span>
+          <span style="font-size:13px;color:var(--t3);text-decoration:line-through;margin-bottom:6px">¥199</span>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px">一次付费 · 永久使用 · 无续费</div>
+      </div>
+      <button class="btn btn-primary" onclick="showPaywall('永久会员','开通永久会员，解锁尤克里里全部内容',true)">👑 立即开通永久会员</button>
+      <div style="font-size:12px;color:var(--teal);text-align:center;margin-top:14px;cursor:pointer" onclick="toast('🎁 新用户注册赠送 7 天全权益体验')">🎁 没决定？先免费试用 7 天 ›</div>
+    </div>
+
+    <!-- 支付方式 -->
+    <div style="padding:0 16px 8px">
+      <div class="card">
+        <div style="font-weight:700;font-size:14px;margin-bottom:10px">💳 支付方式（安卓首发）</div>
+        <div id="pay-methods" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- 试用说明 -->
+    <div style="padding:8px 16px 24px">
+      <div class="card" style="background:#FFF7ED;border:1px solid #FED7AA">
+        <div style="font-weight:700;font-size:13px;color:var(--orange-d);margin-bottom:6px">💡 关于试用与会员</div>
+        <ul style="font-size:12px;color:var(--t2);line-height:1.8;padding-left:18px;margin:0">
+          <li>新用户注册即享 <b>7 天全权益试用</b>，到期自动降级，<b>不自动扣费</b></li>
+          <li>永久会员一次买断，<b>无续费压力</b></li>
+          <li>已开通可在「设置」中<b>恢复购买</b></li>
+          <li>会员问题请看 <b>《会员服务协议》</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 付费墙弹层（统一组件） ========== -->
+  <div class="perm-overlay" id="paywall-overlay">
+    <div class="perm-card" style="max-width:310px">
+      <div style="font-size:44px" id="pw-icon">👑</div>
+      <h3 id="pw-title" style="margin:10px 0 6px">开通永久会员</h3>
+      <p id="pw-desc" style="line-height:1.6">解锁全部课程、曲谱与无限次 AI 评分</p>
+      <div style="background:#FFF7ED;border-radius:12px;padding:12px;margin:14px 0">
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px">
+          <span style="font-size:13px;color:var(--orange-d)">¥</span>
+          <span style="font-size:36px;font-weight:800;color:var(--orange-d);line-height:1">99</span>
+          <span style="font-size:12px;color:var(--t3);margin-bottom:4px">永久买断</span>
+        </div>
+        <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:4px">原价 ¥199 · 限时活动</div>
+      </div>
+      <button class="btn btn-primary" onclick="toast('📦 模拟下单：永久会员 ¥99（Phase 3 接入真实支付）');hidePaywall()">👑 立即开通 ¥99</button>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--t2)">
+        <span onclick="toast('🎁 试用：注册赠 7 天全权益');hidePaywall()" style="cursor:pointer">🎁 先免费试用</span>
+        <span onclick="toast('恢复购买：后端比对渠道订单补开通');hidePaywall()" style="cursor:pointer">↻ 恢复购买</span>
+        <span onclick="hidePaywall()" style="cursor:pointer;color:var(--t3)">以后再说</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+</div><!-- /phone -->
+</div><!-- /stage -->
+
+<script>
+/* ============================================================
+   数据
+   ============================================================ */
+const SONGS = [
+  {id:'song1', title:'小幸运', artist:'田馥甄', emoji:'🍀', color:'#86EFAC', stars:2, diff:'入门', tag:'流行', bpm:72, key:'C'},
+  {id:'song2', title:'晴天', artist:'周杰伦', emoji:'☀️', color:'#FCD34D', stars:2, diff:'入门', tag:'流行', bpm:120, key:'G'},
+  {id:'song3', title:'Lemon', artist:'米津玄师', emoji:'🍋', color:'#FDE68A', stars:3, diff:'进阶', tag:'日系', bpm:88, key:'C'},
+  {id:'song4', title:'平凡之路', artist:'朴树', emoji:'🛤️', color:'#A5F3FC', stars:2, diff:'入门', tag:'民谣', bpm:75, key:'C'},
+  {id:'song5', title:'Somewhere', artist:'指弹曲', emoji:'🏝️', color:'#FBCFE8', stars:5, diff:'指弹', tag:'指弹', bpm:90, key:'C'},
+  {id:'song6', title:'隐形的翅膀', artist:'张韶涵', emoji:'🪽', color:'#C7D2FE', stars:1, diff:'入门', tag:'流行', bpm:80, key:'C'},
+  {id:'song7', title:'童年', artist:'罗大佑', emoji:'🧸', color:'#FECACA', stars:1, diff:'入门', tag:'民谣', bpm:100, key:'C'},
+  {id:'song8', title:'Riptide', artist:'Vance Joy', emoji:'🌊', color:'#67E8F9', stars:3, diff:'进阶', tag:'英文', bpm:102, key:'Am'},
+];
+const RANK = [
+  {no:1, ti:'晴天', ar:'周杰伦 · 12.3万人练过', emoji:'☀️', color:'#FCD34D'},
+  {no:2, ti:'小幸运', ar:'田馥甄 · 10.8万人练过', emoji:'🍀', color:'#86EFAC'},
+  {no:3, ti:'Lemon', ar:'米津玄师 · 8.6万人练过', emoji:'🍋', color:'#FDE68A'},
+  {no:4, ti:'童年', ar:'罗大佑 · 7.1万人练过', emoji:'🧸', color:'#FECACA'},
+];
+const COURSES = [
+  {tag:'必修 · 第1课', emoji:'🎸', color:'#FFE4D6', t:'认识你的尤克里里', d:'持琴姿势·认识琴弦·基本发声', prog:100, meta:'8 分钟 · 已完成'},
+  {tag:'必修 · 第2课', emoji:'🎼', color:'#FFE4D6', t:'学会给琴调音', d:'使用调音器把 4 根弦调准', prog:100, meta:'10 分钟 · 已完成'},
+  {tag:'必修 · 第3课', emoji:'🎵', color:'#FFE4D6', t:'第一个和弦 C 和 Am', d:'两指按弦，10 分钟弹响', prog:60, meta:'12 分钟 · 进行中'},
+  {tag:'必修 · 第4课', emoji:'🎤', color:'#FFE4D6', t:'第一首弹唱《童年》', d:'C-Am-F-G 经典进行', prog:0, meta:'15 分钟 · 未开始'},
+  {tag:'必修 · 第5课', emoji:'🥁', color:'#FFE4D6', t:'扫弦节奏型入门', d:'下下上上下上 民谣节奏', prog:0, meta:'14 分钟 · 未开始'},
+];
+const ACHS = [
+  {e:'🔥', l:'连续7天', on:true},{e:'🎵', l:'掌握10和弦', on:true},{e:'🎤', l:'首弹成功', on:true},
+  {e:'🏆', l:'连续30天', on:false},{e:'⭐', l:'满分曲目', on:false},{e:'💎', l:'Lv.10', on:false},
+  {e:'🎯', l:'指弹入门', on:false},
+];
+
+/* ============================================================
+   页面切换
+   ============================================================ */
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.page===page));
+  // 状态栏颜色：有 hero 的页面用白字
+  const hasHero = ['home','learn','songs'].includes(page) || page==='me';
+  document.getElementById('statusbar').classList.toggle('dark', hasHero);
+  document.querySelector('#statusbar > span:first-child').style.color = hasHero?'#fff':'';
+  document.querySelector('#statusbar .right').style.color = hasHero?'#fff':'';
+}
+function switchLearnTab(el,name){ el.parentNode.querySelectorAll('.tp').forEach(t=>t.classList.remove('active')); el.classList.add('active'); toast('「'+name+'」课程列表'); }
+
+function openDetail(id){
+  const s = SONGS.find(x=>x.id===id) || SONGS[0];
+  document.getElementById('d-title').textContent = s.title;
+  document.getElementById('d-artist').textContent = s.artist + ' · 弹唱版';
+  document.querySelector('.detail-head .key').innerHTML =
+    `<span>Key: ${s.key}</span><span>BPM: ${s.bpm}</span><span>${'⭐'.repeat(s.stars)} ${s.diff}</span><span>4/4</span>`;
+  renderLyrics(s);
+  document.getElementById('detail').classList.add('show');
+}
+function closeDetail(){ document.getElementById('detail').classList.remove('show'); }
+let playing=false;
+function togglePlay(){ playing=!playing; document.getElementById('play-icon').textContent = playing?'⏸':'▶'; document.getElementById('play-label').textContent = playing?'暂停':'播放'; }
+
+function openTuner(){ document.getElementById('tuner').classList.add('show'); }
+function closeTuner(){ if(tunerState.running) toggleTuner(); document.getElementById('tuner').classList.remove('show'); }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function hidePerm(){ document.getElementById('perm-overlay').classList.remove('show'); }
+
+/* ============================================================
+   渲染列表
+   ============================================================ */
+function stars(n){ return '<span class="stars">'+'★'.repeat(n)+'<span style="color:#D1D5DB">'+'★'.repeat(5-n)+'</span></span>'; }
+
+function renderHome(){
+  document.getElementById('hot-songs').innerHTML = SONGS.slice(0,6).map(s=>`
+    <div class="song-card" onclick="openDetail('${s.id}')">
+      <div class="cover" style="background:linear-gradient(135deg,${s.color},${s.color}aa)">${s.emoji}</div>
+      <div class="ti">${s.title}</div>
+      <div class="ar">${s.artist}</div>
+      ${stars(s.stars)}
+    </div>`).join('');
+  document.getElementById('rank-list').innerHTML = RANK.map(r=>`
+    <div class="rank-row" onclick="openDetail('song2')">
+      <div class="no">${r.no}</div>
+      <div class="cv" style="background:linear-gradient(135deg,${r.color},${r.color}aa)">${r.emoji}</div>
+      <div class="info"><b>${r.ti}</b><p>${r.ar}</p></div>
+      <div class="ht">弹 ›</div>
+    </div>`).join('');
+}
+function renderCourses(){
+  document.getElementById('course-list').innerHTML = COURSES.map(c=>`
+    <div class="course-card" onclick="toast('进入课程：${c.t}')">
+      <div class="cc-l" style="background:linear-gradient(135deg,${c.color},#fff)">${c.emoji}</div>
+      <div class="cc-r">
+        <div class="tag">${c.tag}</div>
+        <h3>${c.t}</h3>
+        <p>${c.d}</p>
+        <div class="meta">
+          <div class="pill"><i style="width:${c.prog}%"></i></div>
+          <span>${c.meta}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function renderSongs(){
+  document.getElementById('song-list').innerHTML = SONGS.map(s=>{
+    const locked = s.stars>=3; // 进阶/指弹为会员内容（见 MONETIZATION §2）
+    const click = locked ? `showPaywall('《${s.title}》','开通会员，解锁全部进阶 & 指弹曲谱')` : `openDetail('${s.id}')`;
+    return `
+    <div class="song-row" onclick="${click}">
+      <div class="cv" style="background:linear-gradient(135deg,${s.color},${s.color}aa);position:relative">
+        ${s.emoji}
+        ${locked?'<span style="position:absolute;top:-4px;right:-4px;background:linear-gradient(135deg,#7C3AED,#FF8A3D);color:#fff;font-size:9px;padding:1px 5px;border-radius:6px;font-weight:700">👑</span>':''}
+      </div>
+      <div class="info"><b>${s.title}</b><p>${s.artist} · ${s.tag} · ${s.key}调${locked?' · <span style="color:#7C3AED">会员</span>':''}</p></div>
+      <div class="dif">${'⭐'.repeat(s.stars)}<br>${s.diff}</div>
+    </div>`;
+  }).join('');
+}
+function renderCal(){
+  // 渲染 28 天，随机标记已练
+  const seed=[1,1,1,1,0,1,1, 1,1,1,1,1,0,1, 1,0,1,1,1,1,1, 1,1,0,1,1,0,1];
+  document.getElementById('cal-grid').innerHTML = seed.map((v,i)=>`<div class="d ${v?'on':''} ${i===26?'today':''}">${i+1}</div>`).join('');
+}
+function renderAch(){
+  document.getElementById('ach-row').innerHTML = ACHS.map(a=>`
+    <div class="am ${a.on?'':'lock'}"><div class="mm">${a.e}</div><div class="ll">${a.l}</div></div>`).join('');
+}
+
+/* ============================================================
+   会员中心 / 付费墙（商业化预留 UI）
+   ============================================================ */
+// 权益矩阵（与 docs/MONETIZATION.md §2 一致）
+const BENEFITS = [
+  ['🎼 智能调音器', true, true],
+  ['⏱️ 节拍器（基础）', true, true],
+  ['🎵 和弦库（全部）', '基础和弦', '✅ 全部'],
+  ['🎼 入门曲谱（⭐⭐）', true, true],
+  ['🎼 进阶/指弹曲谱', '🔒', '✅ 全部'],
+  ['🎤 AI 跟弹评分', '每日 3 次', '✅ 无限'],
+  ['🎓 全部课程（必修+选修+Pro）', '前 5 节', '✅ 全部'],
+  ['🏆 排行榜 / 好友 PK', '🔒', '✅'],
+  ['☁️ 云端同步 / 多设备', '🔒', '✅'],
+];
+const PAY_METHODS = [
+  {e:'🛒', n:'应用商店内购', d:'华为/小米/OPPO/vivo/应用宝', rec:false},
+  {e:'💚', n:'微信支付', d:'直连 · 限时低价通道', rec:true},
+  {e:'💙', n:'支付宝', d:'直连 · 限时低价通道', rec:false},
+  {e:'🍏', n:'Apple IAP', d:'iOS 上线后开放（后期）', rec:false, soon:true},
+];
+
+function renderMember(){
+  document.getElementById('member-benefits').innerHTML = BENEFITS.map(([f,free,mem])=>{
+    const fc = free===true ? '<span style="color:var(--ok)">✓</span>'
+             : (typeof free==='string' ? `<span style="color:var(--t3);font-size:11px">${free}</span>` : `<span style="color:var(--t3)">—</span>`);
+    const mc = mem===true ? '<span style="color:var(--ok)">✓</span>'
+             : `<span style="color:var(--orange-d);font-size:11px;font-weight:600">${mem}</span>`;
+    return `<tr style="border-top:1px solid var(--line)">
+      <td style="padding:10px 12px;color:var(--t1)">${f}</td>
+      <td style="text-align:center;padding:10px 4px">${fc}</td>
+      <td style="text-align:center;padding:10px 4px">${mc}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('pay-methods').innerHTML = PAY_METHODS.map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;background:#F9FAFB">
+      <div style="font-size:22px">${p.e}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${p.n}${p.rec?' <span style="font-size:10px;color:#fff;background:var(--orange);padding:1px 6px;border-radius:6px">推荐</span>':''}</div>
+      <div style="font-size:11px;color:var(--t2)">${p.d}</div></div>
+      ${p.soon?'<span style="font-size:10px;color:var(--t3)">待开放</span>':'<span style="color:var(--t3)">○</span>'}
+    </div>`).join('');
+}
+
+function openMember(){
+  renderMember();
+  document.getElementById('member-page').classList.add('show');
+}
+function closeMember(){ document.getElementById('member-page').classList.remove('show'); }
+
+// 统一付费墙（FeatureGate 返回 Locked 时调用）
+function showPaywall(feature, desc, fromMember){
+  document.getElementById('pw-title').textContent = fromMember ? '开通永久会员' : '解锁「'+feature+'」';
+  document.getElementById('pw-desc').textContent = desc || '开通会员，解锁全部内容';
+  document.getElementById('paywall-overlay').classList.add('show');
+}
+function hidePaywall(){ document.getElementById('paywall-overlay').classList.remove('show'); }
+function renderLyrics(s){
+  // 示例：带和弦的歌词（小幸运片段结构）
+  const lines = [
+    [['','我听见雨滴落在'],['C','青青草地']],[['','我听见远方下起'],['Am','钟声响起']],
+    [['','可是我没有听见'],['F','你的声音']],[['G','认真'],['C','呼唤我姓名']],
+    [['','爱上你的时候还不懂感情']],[['','离别了才觉得刻骨铭心']],
+    [['Am','为什么没有发现遇见了你'],['F','是生命最好的'],['G','事情']],
+  ];
+  document.getElementById('lyrics').innerHTML = lines.map((ln,i)=>{
+    const html = ln.map(part=> part[0]?`<span class="chord">${part[0]}</span>${part[1]}` : part[1]).join(' ');
+    return `<div class="ln ${i===2?'now':''}">${html}</div>`;
+  }).join('');
+}
+
+/* ============================================================
+   ★ 调音器：YIN 实时音高识别（核心）
+   ============================================================ */
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+// 标准音频率
+const NOTE_FREQ={ 'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,
+                  'G3':196.00 };
+
+const tunerState = {
+  running:false, ctx:null, stream:null, analyser:null, rafId:null,
+  curNote:'G', curOct:4, lowG:false,
+  smoothFreq:0, lastNote:null, stableCount:0, okCount:0, tunedSet:new Set()
+};
+
+// High-G / Low-G 切换
+function toggleGMode(){
+  tunerState.lowG = !tunerState.lowG;
+  document.getElementById('g-mode').textContent = tunerState.lowG?'Low-G':'High-G';
+  // 更新 4 弦标准
+  const g4=document.querySelector('.str[data-note="G"]');
+  g4.dataset.oct = tunerState.lowG?3:4;
+  g4.querySelector('.lbl').textContent = tunerState.lowG?'4弦(低)':'4弦';
+  toast(tunerState.lowG?'已切换 Low-G（G3）':'已切换 High-G（G4）');
+}
+
+function selString(el){
+  document.querySelectorAll('.str').forEach(s=>s.classList.remove('on'));
+  el.classList.add('on');
+  tunerState.curNote = el.dataset.note;
+  tunerState.curOct = parseInt(el.dataset.oct);
+}
+
+/* ---- YIN 算法实现 ---- */
+function YIN(buffer, sampleRate){
+  const threshold=0.12;        // YIN 阈值（调音用低值更严格）
+  const minFreq=70, maxFreq=1200;
+  const tauMin=Math.floor(sampleRate/maxFreq);
+  const tauMax=Math.min(Math.floor(sampleRate/minFreq), buffer.length/2);
+  // 1. difference function
+  const diff=new Float32Array(tauMax);
+  for(let tau=tauMin; tau<tauMax; tau++){
+    let sum=0;
+    for(let i=0;i<tauMax;i++){
+      const d=buffer[i]-buffer[i+tau];
+      sum+=d*d;
+    }
+    diff[tau]=sum;
+  }
+  // 2. cumulative mean normalized difference
+  const cmnd=new Float32Array(tauMax);
+  cmnd[0]=1;
+  let run=0;
+  for(let tau=1;tau<tauMax;tau++){
+    run+=diff[tau];
+    cmnd[tau]= run>0 ? diff[tau]*tau/run : 1;
+  }
+  // 3. absolute threshold
+  let tauEst=-1;
+  for(let tau=tauMin; tau<tauMax; tau++){
+    if(cmnd[tau]<threshold){
+      while(tau+1<tauMax && cmnd[tau+1]<cmnd[tau]) tau++;
+      tauEst=tau; break;
+    }
+  }
+  if(tauEst===-1){
+    // 找最小值兜底
+    let minv=Infinity; for(let tau=tauMin;tau<tauMax;tau++){ if(cmnd[tau]<minv){minv=cmnd[tau];tauEst=tau;} }
+    if(tauEst===-1 || minv>0.5) return -1;
+  }
+  // 4. parabolic interpolation（抛物线插值提升精度）
+  let betterTau=tauEst;
+  if(tauEst>0 && tauEst<tauMax-1){
+    const x0=tauEst-1, x1=tauEst, x2=tauEst+1;
+    const y0=cmnd[x0], y1=cmnd[x1], y2=cmnd[x2];
+    const denom=(2*(2*y1-y2-y0));
+    if(denom!==0) betterTau = tauEst + (y0-y2)/denom;
+  }
+  return sampleRate/betterTau;
+}
+
+// 频率转音名 + cents
+function freqToNote(freq){
+  const noteNum=12*Math.log2(freq/440)+69;     // MIDI
+  const round=Math.round(noteNum);
+  const cents=Math.round((noteNum-round)*100);
+  const name=NOTE_NAMES[((round%12)+12)%12];
+  const oct=Math.floor(round/12)-1;
+  return {name, oct, cents, midi:round};
+}
+
+// RMS 能量（噪声门限）
+function rms(buffer){ let s=0; for(let i=0;i<buffer.length;i++) s+=buffer[i]*buffer[i]; return Math.sqrt(s/buffer.length); }
+
+async function toggleTuner(){
+  const btn=document.getElementById('tuner-btn');
+  if(!tunerState.running){
+    // 请求麦克风
+    try{
+      tunerState.stream = await navigator.mediaDevices.getUserMedia({
+        audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+      });
+    }catch(e){
+      document.getElementById('perm-overlay').classList.add('show');
+      return;
+    }
+    tunerState.ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const src = tunerState.ctx.createMediaStreamSource(tunerState.stream);
+    tunerState.analyser = tunerState.ctx.createAnalyser();
+    tunerState.analyser.fftSize = 2048;
+    src.connect(tunerState.analyser);
+    tunerState.running=true;
+    btn.textContent='⏹ 停止调音';
+    btn.classList.add('active');
+    document.getElementById('t-hz').textContent='正在聆听…请弹响当前弦';
+    loop();
+  }else{
+    tunerState.running=false;
+    cancelAnimationFrame(tunerState.rafId);
+    tunerState.stream.getTracks().forEach(t=>t.stop());
+    tunerState.ctx.close();
+    btn.textContent='🎤 开始调音';
+    btn.classList.remove('active');
+    document.getElementById('t-note').textContent='—';
+    document.getElementById('t-hz').textContent='已停止';
+    document.getElementById('t-status').textContent='';
+    document.getElementById('t-status').className='status';
+    document.getElementById('needle').style.transform='translate(-50%,-100%) rotate(0deg)';
+    document.getElementById('needle').classList.remove('ok');
+    document.getElementById('t-cents').textContent='';
+  }
+}
+
+function loop(){
+  if(!tunerState.running) return;
+  const an=tunerState.analyser;
+  const buf=new Float32Array(an.fftSize);
+  an.getFloatTimeDomainData(buf);
+
+  const energy=rms(buf);
+  if(energy < 0.008){
+    // 太安静，不更新
+    document.getElementById('t-hz').textContent='请弹响琴弦…';
+    requestAnimationFrame(loop);
+    return;
+  }
+
+  const freq=YIN(buf, tunerState.ctx.sampleRate);
+  if(freq>0){
+    // 平滑（指数移动平均）
+    tunerState.smoothFreq = tunerState.smoothFreq===0 ? freq : tunerState.smoothFreq*0.5+freq*0.5;
+    const f=tunerState.smoothFreq;
+    const info=freqToNote(f);
+
+    // 显示
+    document.getElementById('t-note').textContent=info.name;
+    document.getElementById('t-oct').textContent=info.oct;
+    document.getElementById('t-hz').textContent=f.toFixed(1)+' Hz';
+
+    const cents=info.cents;
+    document.getElementById('t-cents').textContent = (cents>0?'+':'')+cents+' cents';
+    // 指针角度：-50..+50 cents 映射到 -60..+60 度
+    const angle=Math.max(-60,Math.min(60, cents*1.2));
+    const needle=document.getElementById('needle');
+    needle.style.transform=`translate(-50%,-100%) rotate(${angle}deg)`;
+
+    const status=document.getElementById('t-status');
+    const inTune = Math.abs(cents)<=5;
+    if(inTune){
+      status.textContent='✓ 调准了！'; status.className='status ok';
+      needle.classList.add('ok');
+      // 当前弦标记完成
+      checkTuned(info);
+    }else if(cents<0){
+      status.textContent='偏低 ↑ 拧紧'; status.className='status lo';
+      needle.classList.remove('ok');
+    }else{
+      status.textContent='偏高 ↓ 拧松'; status.className='status hi';
+      needle.classList.remove('ok');
+    }
+  }
+  tunerState.rafId=requestAnimationFrame(loop);
+}
+
+function checkTuned(info){
+  // 检查是否对应当前选中弦并标记
+  const cur = document.querySelector('.str.on');
+  if(cur && info.name===cur.dataset.note && info.oct===parseInt(cur.dataset.oct) && Math.abs(info.cents)<=5){
+    tunerState.okCount++;
+    if(tunerState.okCount>8){ // 持续稳定 8 帧
+      cur.classList.add('ok');
+      if(!tunerState.tunedSet.has(cur.dataset.note+cur.dataset.oct)){
+        tunerState.tunedSet.add(cur.dataset.note+cur.dataset.oct);
+        toast('✅ '+cur.dataset.note+cur.dataset.oct+' 弦已调准！');
+      }
+      // 自动跳到下一根未调准的弦
+      const next=[...document.querySelectorAll('.str')].find(s=>!s.classList.contains('ok'));
+      if(next){ setTimeout(()=>selString(next), 600); }
+      else if(tunerState.tunedSet.size>=4){ setTimeout(()=>toast('🎉 全部调准！可以开始练琴啦'),800); }
+    }
+  }else{
+    tunerState.okCount=0;
+  }
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+renderHome(); renderCourses(); renderSongs(); renderCal(); renderAch();
+</script>
+</body>
+</html>

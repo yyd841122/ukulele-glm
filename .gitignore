@@ -1,0 +1,71 @@
+# ============ 操作系统 ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ IDE / 编辑器 ============
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.atom/
+.fleet/
+
+# ============ Flutter / Dart 构建产物（核心：绝不入库）============
+src/build/
+src/.dart_tool/
+src/.flutter-plugins
+src/.flutter-plugins-dependencies
+src/.packages
+src/.pub-cache/
+src/.pub/
+src/generated_plugin_registrant.dart
+
+# ============ Android 构建缓存 ============
+src/android/.gradle/
+src/android/build/
+src/android/app/build/
+src/android/captures/
+src/android/gradlew
+src/android/gradlew.bat
+src/android/local.properties
+src/android/key.properties
+**/android/**/gradle-wrapper.jar
+src/.android/
+
+# ============ iOS（如有）============
+src/ios/Pods/
+src/ios/.symlinks/
+src/ios/Flutter/Flutter.framework
+src/ios/Flutter/Flutter.podspec
+src/ios/Flutter/flutter_assets/
+src/ios/ServiceDefinitions.json
+src/ios/Runner/GeneratedPluginRegistrant.*
+
+# ============ Web 构建产物 ============
+src/web/icons/Icon-192.png
+src/web/icons/Icon-512.png
+src/web/icons/Icon-maskable-192.png
+src/web/icons/Icon-maskable-512.png
+
+# ============ 密钥 / 签名 / 敏感配置 ============
+*.keystore
+*.jks
+**/android/key.properties
+**/android/app/google-services.json
+**/.env
+**/.env.local
+
+# ============ 日志 / 临时 ============
+*.log
+*.tmp
+*.bak
+~$*
+
+# ============ 本地服务缓存（python http.server 等）============
+__pycache__/
+*.pyc
+
+# ============ Agent 协作本地配置（可选保留）============
+# .agent/

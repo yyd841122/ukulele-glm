@@ -1,0 +1,44 @@
+name: ukulele_ai
+description: "尤克里里 AI 学园 - AI 互动尤克里里学习 App"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # 状态管理
+  flutter_riverpod: ^2.6.1
+
+  # 路由
+  go_router: ^14.6.0
+
+  # 音频采集（麦克风 PCM 流）+ 音高识别
+  # record：跨平台麦克风 PCM 采集（web/android 都支持）
+  # pitch_detector_dart：纯 Dart YIN 识别器，跨平台，不依赖原生（核心算法）
+  record: ^7.1.0
+  pitch_detector_dart: ^0.0.4
+
+  # 本地存储（打卡/练习记录/权益缓存）
+  shared_preferences: ^2.3.3
+
+  # web 平台 JS 互操作（TickPlayer 用 Web Audio API）
+  web: ^1.1.1
+
+  # 节拍器 tick 声播放（移动端用，SystemSound 在 Android 多数设备无声）
+  audioplayers: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/sounds/
