@@ -72,8 +72,8 @@ class PitchDetectionService {
   int get actualSampleRate => _actualSampleRate;
 
   final AudioRecorder _recorder = AudioRecorder();
-  final PitchDetector _detector =
-      PitchDetector(audioSampleRate: _sampleRate.toDouble(), bufferSize: _bufferSize);
+  // 延迟创建：等探测到实际采样率后，用正确的采样率构造 YIN 识别器
+  PitchDetector? _detector;
 
   StreamSubscription? _audioSub;
   final _pitchController = StreamController<PitchResult>.broadcast();
@@ -112,6 +112,11 @@ class PitchDetectionService {
 
     // 探测 Web AudioContext 真实采样率（Chroma 和弦识别必须用对，否则频率偏移）
     _actualSampleRate = detectActualSampleRate(_sampleRate);
+    // 用实际采样率创建 YIN 识别器（采样率不匹配会导致频率系统性偏移！）
+    _detector = PitchDetector(
+      audioSampleRate: _actualSampleRate.toDouble(),
+      bufferSize: _bufferSize,
+    );
 
     Stream<List<int>> stream;
     try {
@@ -171,7 +176,7 @@ class PitchDetectionService {
       final samples = _bytesToFloat(pcm16Bytes);
       // 计算 RMS 能量（用于噪声门限）
       final energy = _rmsFromSamples(samples);
-      final result = await _detector.getPitchFromIntBuffer(pcm16Bytes);
+      final result = await _detector!.getPitchFromIntBuffer(pcm16Bytes);
       _pitchController.add(PitchResult(
         frequency: result.pitch > 0 ? result.pitch : null,
         probability: result.probability,

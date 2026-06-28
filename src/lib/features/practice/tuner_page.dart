@@ -31,12 +31,16 @@ class TunerState {
   final double? frequency;
   final bool isRunning;
   final Set<String> tunedStrings; // 已调准的弦（音名+八度）
+  final int hitCount; // 诊断：当前弦命中帧数
+  final bool isCurrentTuned; // 诊断：当前弦是否判准
 
   const TunerState({
     this.note,
     this.frequency,
     this.isRunning = false,
     this.tunedStrings = const {},
+    this.hitCount = 0,
+    this.isCurrentTuned = false,
   });
 
   TunerState copyWith({
@@ -59,6 +63,8 @@ class TunerNotifier extends StateNotifier<TunerState> {
   final PitchDetectionService _pitchService;
   final Ref _ref;
   StreamSubscription? _sub;
+  final List<bool> _hitWindow = []; // 滑动窗口：最近几帧是否命中（容忍抖动）
+  bool _autoSwitched = false; // 当前弦是否已自动切换过（防重复）
 
   TunerNotifier(this._pitchService, this._ref) : super(const TunerState());
 
@@ -76,6 +82,8 @@ class TunerNotifier extends StateNotifier<TunerState> {
   Future<void> start() async {
     state = state.copyWith(isRunning: true);
     try {
+      _hitWindow.clear();
+      _autoSwitched = false;
       await _pitchService.start();
       _sub = _pitchService.pitchStream.listen(_onPitch);
     } catch (e) {
@@ -101,23 +109,62 @@ class TunerNotifier extends StateNotifier<TunerState> {
       return;
     }
 
-    final info = frequencyToNote(r.frequency!);
     final tuned = Set<String>.from(state.tunedStrings);
 
-    // 判断是否对应当前选中弦且调准
-    final cur = _tuning[_ref.read(selectedStringProvider)];
-    if (info.name == cur.name &&
-        info.octave == cur.octave &&
-        info.isInTune(threshold: 5)) {
+    final curIdx = _ref.read(selectedStringProvider);
+    final cur = _tuning[curIdx];
+    final targetFreq = cur.frequency;
+    // 用原始识别频率（不做八度校正），先看清真实数据
+    final rawFreq = r.frequency!;
+    final rawInfo = frequencyToNote(rawFreq);
+    final freqDiff = (rawFreq - targetFreq).abs() / targetFreq;
+    final isCurrentInTune = freqDiff <= 0.03;
+
+    // 滑动窗口：记录最近 8 帧的命中情况，命中数 >=5 即算稳定调准
+    _hitWindow.add(isCurrentInTune);
+    if (_hitWindow.length > 8) _hitWindow.removeAt(0);
+    final hitCount = _hitWindow.where((h) => h).length;
+
+    if (isCurrentInTune) {
       tuned.add(cur.fullName);
     }
 
     state = TunerState(
-      note: info,
-      frequency: r.frequency,
+      note: rawInfo,
+      frequency: rawFreq,
       isRunning: true,
       tunedStrings: tuned,
+      hitCount: hitCount,
+      isCurrentTuned: isCurrentInTune,
     );
+
+    // 自动切换：最近 8 帧命中 ≥5（容忍偶发抖动）→ 切下一根未调准的弦
+    if (hitCount >= 5 && !_autoSwitched) {
+      _autoSwitched = true; // 防重复
+      final currentTuning = _ref.read(lowGProvider) ? kLowGTuning : kHighGTuning;
+      final nextIdx = _findNextUntunedString(curIdx, tuned, currentTuning);
+      if (nextIdx != null && nextIdx != curIdx) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (state.isRunning) {
+            _ref.read(selectedStringProvider.notifier).state = nextIdx;
+            // 重置窗口，准备下一根弦
+            _hitWindow.clear();
+            _autoSwitched = false;
+          }
+        });
+      }
+    }
+  }
+
+  /// 找下一根未调准的弦（从当前弦之后顺序找）
+  int? _findNextUntunedString(int fromIdx, Set<String> tuned, List<UkuleleString> tuning) {
+    for (var offset = 1; offset <= tuning.length; offset++) {
+      final idx = (fromIdx + offset) % tuning.length;
+      if (!tuned.contains(tuning[idx].fullName)) {
+        return idx;
+      }
+    }
+    return null;
   }
 
   @override
@@ -189,7 +236,7 @@ class TunerPage extends ConsumerWidget {
             _Dial(
               state: state,
               diagText: state.isRunning
-                  ? '采集包:${ref.read(pitchServiceProvider).audioPackets} 识别:${ref.read(pitchServiceProvider).detectCalls}'
+                  ? '识别:${state.frequency?.toStringAsFixed(0) ?? "-"}Hz 命中:${state.hitCount}'
                   : null,
             ),
 
