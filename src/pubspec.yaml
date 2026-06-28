@@ -26,6 +26,9 @@ dependencies:
   # 本地存储（打卡/练习记录/权益缓存）
   shared_preferences: ^2.3.3
 
+  # FFT 库（和弦识别的 Chroma 色度特征计算用）
+  fftea: ^1.5.0
+
   # web 平台 JS 互操作（TickPlayer 用 Web Audio API）
   web: ^1.1.1
 

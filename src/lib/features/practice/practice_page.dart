@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'tuner_page.dart';
 import 'metronome_page.dart';
 import 'chord_library_page.dart';
+import 'rhythm_practice_page.dart';
+import 'chord_transition_page.dart';
 import '../../core/theme/app_theme.dart';
 
 class PracticePage extends StatelessWidget {
@@ -88,9 +90,25 @@ class PracticePage extends StatelessWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Expanded(child: _ToolCard(icon: '🥁', title: '节奏练习', subtitle: '扫弦节奏型')),
+                        Expanded(
+                          child: _ToolCard(
+                            icon: '🥁',
+                            title: '节奏练习',
+                            subtitle: '扫弦节奏型',
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const RhythmPracticePage())),
+                          ),
+                        ),
                         const SizedBox(width: 12),
-                        Expanded(child: _ToolCard(icon: '🔁', title: '和弦转换', subtitle: '提速训练')),
+                        Expanded(
+                          child: _ToolCard(
+                            icon: '🔁',
+                            title: '和弦转换',
+                            subtitle: '提速训练',
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const ChordTransitionPage())),
+                          ),
+                        ),
                       ],
                     ),
                   ],

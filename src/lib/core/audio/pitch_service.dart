@@ -17,6 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pitch_detector_dart/pitch_detector.dart';
 import 'package:record/record.dart';
 
+import 'sr_probe.dart';
+
 /// 音高识别结果事件
 @immutable
 class PitchResult {
@@ -26,16 +28,25 @@ class PitchResult {
   /// YIN 置信度（0~1），越接近 0 越可信
   final double? probability;
 
+  /// 音频 RMS 能量（0~1），用于噪声门限判断
+  final double energy;
+
+  /// 原始 PCM 样本（Float32 归一化），供下游做 FFT/和弦识别
+  final Float32List? samples;
+
   /// 时间戳（启动后的毫秒）
   final int timestampMs;
 
   const PitchResult({
     required this.frequency,
     required this.probability,
+    required this.energy,
     required this.timestampMs,
+    this.samples,
   });
 
-  bool get hasPitch => frequency != null && frequency! > 0;
+  /// 是否有有效音高：频率 > 0 且能量超过门限（过滤环境噪声）
+  bool get hasPitch => frequency != null && frequency! > 0 && energy > 0.01;
 
   @override
   String toString() =>
@@ -54,6 +65,11 @@ class PitchResult {
 class PitchDetectionService {
   static const int _sampleRate = 44100;
   static const int _bufferSize = 2048; // YIN 窗口（约 46ms@44.1k）
+
+  /// 实际采样率（Web 上 AudioContext 可能用 48000 而非请求的 44100，
+  /// Chroma 识别必须用真实采样率否则频率计算整体偏移）。
+  int _actualSampleRate = _sampleRate;
+  int get actualSampleRate => _actualSampleRate;
 
   final AudioRecorder _recorder = AudioRecorder();
   final PitchDetector _detector =
@@ -94,6 +110,9 @@ class PitchDetectionService {
 
     _isRunning = true;
 
+    // 探测 Web AudioContext 真实采样率（Chroma 和弦识别必须用对，否则频率偏移）
+    _actualSampleRate = detectActualSampleRate(_sampleRate);
+
     Stream<List<int>> stream;
     try {
       stream = await _recorder.startStream(const RecordConfig(
@@ -109,19 +128,27 @@ class PitchDetectionService {
       throw PitchServiceException('无法访问麦克风：$e');
     }
 
-    // 累积 PCM16 字节到一帧窗口再识别，避免碎包且保证 YIN 精度
+    // 累积 PCM16 字节到一帧窗口再识别。
+    // 用索引追踪消费位置，避免 removeRange（头部删除 O(n) 会卡顿）。
     final frameBuffer = <int>[];
+    final frameByteLen = _bufferSize * 2; // 一帧字节数（每样本 2 字节）
+    var consumeOffset = 0; // 已消费到的字节偏移
     _audioPackets = 0;
     _detectCalls = 0;
     _audioSub = stream.listen((data) {
       _audioPackets++;
       frameBuffer.addAll(data);
-      while (frameBuffer.length >= _bufferSize * 2) {
-        // 取一帧（每样本 2 字节）
-        final frameBytes =
-            Uint8List.fromList(frameBuffer.sublist(0, _bufferSize * 2));
-        frameBuffer.removeRange(0, _bufferSize * 2);
+      // 用 50% 重叠（每次前进半个窗口），提升时间分辨率 + 响应速度
+      while (frameBuffer.length - consumeOffset >= frameByteLen) {
+        final frameBytes = Uint8List.fromList(
+            frameBuffer.sublist(consumeOffset, consumeOffset + frameByteLen));
         _detect(frameBytes);
+        consumeOffset += frameByteLen ~/ 2; // 半个窗口步进
+        // 周期性清理已消费数据，避免内存无限增长
+        if (consumeOffset > frameByteLen * 4) {
+          frameBuffer.removeRange(0, consumeOffset);
+          consumeOffset = 0;
+        }
       }
     });
   }
@@ -140,16 +167,44 @@ class PitchDetectionService {
   void _detect(Uint8List pcm16Bytes) async {
     _detectCalls++;
     try {
+      // PCM16 → Float32 样本（供下游 FFT/和弦识别）
+      final samples = _bytesToFloat(pcm16Bytes);
+      // 计算 RMS 能量（用于噪声门限）
+      final energy = _rmsFromSamples(samples);
       final result = await _detector.getPitchFromIntBuffer(pcm16Bytes);
       _pitchController.add(PitchResult(
         frequency: result.pitch > 0 ? result.pitch : null,
         probability: result.probability,
+        energy: energy,
         timestampMs: DateTime.now().millisecondsSinceEpoch,
+        samples: samples,
       ));
     } catch (e) {
       // 缓冲不足等异常静默忽略
       debugPrint('pitch detect error: $e');
     }
+  }
+
+  /// PCM16 (little-endian bytes) → Float32 [-1.0, 1.0]
+  Float32List _bytesToFloat(Uint8List bytes) {
+    final sampleCount = bytes.length ~/ 2;
+    if (sampleCount == 0) return Float32List(0);
+    final result = Float32List(sampleCount);
+    final data = ByteData.sublistView(bytes);
+    for (var i = 0; i < sampleCount; i++) {
+      final v = data.getInt16(i * 2, Endian.little);
+      result[i] = v / 32768.0;
+    }
+    return result;
+  }
+
+  double _rmsFromSamples(Float32List samples) {
+    if (samples.isEmpty) return 0;
+    double sumSq = 0;
+    for (final v in samples) {
+      sumSq += v * v;
+    }
+    return sumSq / samples.length;
   }
 
   Future<void> dispose() async {
