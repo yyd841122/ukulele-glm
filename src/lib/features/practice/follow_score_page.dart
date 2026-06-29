@@ -152,7 +152,7 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
 
   // ─── 试听展示 ───
   void _preview() async {
-    // 已在试听 → 停止（修复：之前直接 return 导致无法暂停）
+    // 已在试听 → 停止
     if (_previewing) {
       setState(() => _previewing = false);
       return;
@@ -160,11 +160,50 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
     setState(() => _previewing = true);
     final noteDuration = Duration(milliseconds: 60000 * 2 ~/ _bpm);
     for (final item in _items) {
-      if (!_previewing) break; // 被停止则中断
-      playTone(name: item.name, octave: item.octave, type: _toneType);
+      if (!_previewing) break;
+      if (item.chordFrets != null) {
+        // 和弦：依次快速播放 4 根弦（模拟扫弦）
+        _playChordStrum(item);
+      } else {
+        // 单音
+        playTone(name: item.name, octave: item.octave, type: _toneType);
+      }
       await Future.delayed(noteDuration);
     }
     if (_previewing) setState(() => _previewing = false);
+  }
+
+  /// 播放和弦扫弦（依次拨响 4 根弦，模拟扫弦效果）
+  void _playChordStrum(PracticeItem item) {
+    // frets [G,C,E,A] → 对应弦的音名+八度
+    final stringNotes = [
+      ('G', 4), ('C', 4), ('E', 4), ('A', 4),
+    ];
+    for (var i = 0; i < 4; i++) {
+      final fret = item.chordFrets![i];
+      if (fret < 0) continue; // 闷音不弹
+      // 品位 0=空弦，品位>0 升对应半音
+      final base = stringNotes[i];
+      final (name, octave) = _fretToNote(base.$1, base.$2, fret);
+      // 依次播放（间隔 30ms 模拟扫弦）
+      Future.delayed(Duration(milliseconds: i * 30), () {
+        if (_previewing) {
+          playTone(name: name, octave: octave, type: _toneType);
+        }
+      });
+    }
+  }
+
+  /// 品位 → 实际音名+八度
+  (String, int) _fretToNote(String baseName, int baseOctave, int fret) {
+    if (fret == 0) return (baseName, baseOctave);
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    var idx = names.indexOf(baseName);
+    idx += fret;
+    var octave = baseOctave;
+    while (idx >= 12) { idx -= 12; octave++; }
+    while (idx < 0) { idx += 12; octave--; }
+    return (names[idx], octave);
   }
 
   // ─── 开始跟弹（循环模式）───

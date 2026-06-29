@@ -80,7 +80,9 @@ class TunerNotifier extends StateNotifier<TunerState> {
   }
 
   Future<void> start() async {
-    state = state.copyWith(isRunning: true);
+    // 重新开始调音：清空已调准标记 + 命中窗口 + 回到第1根弦(G)
+    state = TunerState(isRunning: true, tunedStrings: {});
+    _ref.read(selectedStringProvider.notifier).state = 0; // 回到 G 弦
     try {
       _hitWindow.clear();
       _autoSwitched = false;

@@ -86,8 +86,8 @@ class ScoringEngine extends StateNotifier<ScoringState> {
   final PitchDetectionService _pitchService;
   StreamSubscription<PitchResult>? _sub;
   List<TargetNote> _notes = [];
-  DateTime _startTime = DateTime.now();
   int _currentNoteIndex = 0;
+  int _matchStreak = 0; // 连续匹配帧数（防噪声误触发）
 
   /// 音准容差（cents）：|偏差| ≤ 此值视为弹对
   static const int _toleranceCents = 25;
@@ -100,10 +100,10 @@ class ScoringEngine extends StateNotifier<ScoringState> {
   Future<void> start(List<TargetNote> notes) async {
     _notes = notes;
     _currentNoteIndex = 0;
+    _matchStreak = 0;
     state = ScoringState(isRunning: true, currentIndex: 0, judgements: []);
 
     _sub = _pitchService.pitchStream.listen(_onPitch);
-    _startTime = DateTime.now();
 
     try {
       await _pitchService.start();
@@ -145,48 +145,46 @@ class ScoringEngine extends StateNotifier<ScoringState> {
 
     // 当前应弹音符
     if (_currentNoteIndex >= _notes.length) {
-      // 全部判完
       stop();
       return;
     }
     final target = _notes[_currentNoteIndex];
 
-    // 检查是否已超过当前音符的截止时间
-    final elapsed = DateTime.now().difference(_startTime);
-    final noteEnd = target.start + target.duration;
-
-    if (r.hasPitch) {
+    // 能量门限 + 频率合理性：过滤环境噪声
+    if (r.hasPitch && r.energy > 0.02 && r.frequency! >= 130 && r.frequency! <= 700) {
       final info = frequencyToNote(r.frequency!);
-      // 音名+八度匹配，或在容差内
-      final nameMatch = info.name == target.name && info.octave == target.octave;
+      // 放宽：只比音名（不卡八度，避免采样率导致的八度偏移误判）
+      final nameMatch = info.name == target.name;
       if (nameMatch && info.cents.abs() <= _toleranceCents) {
-        // 弹对！判定并前进
-        final judge = NoteJudgement(
-          target: target,
-          correct: true,
-          centsError: info.cents.abs(),
-        );
-        _advance(judge);
-        return;
+        // 滑动窗口：连续 2 帧匹配才算弹对（防环境噪声偶发误触发）
+        _matchStreak++;
+        if (_matchStreak >= 2) {
+          _matchStreak = 0;
+          final judge = NoteJudgement(
+            target: target,
+            correct: true,
+            centsError: info.cents.abs(),
+          );
+          _advance(judge);
+          return;
+        }
+      } else {
+        _matchStreak = 0;
       }
-      // 实时显示当前 cents 偏差（相对目标音）
+      // 实时显示当前 cents 偏差
       state = ScoringState(
         isRunning: true,
         currentIndex: _currentNoteIndex,
         judgements: state.judgements,
         lastPitchCents: info.cents,
       );
+    } else {
+      _matchStreak = 0;
     }
 
-    // 时间到，未弹对 → 判错，前进
-    if (elapsed >= noteEnd) {
-      final judge = NoteJudgement(
-        target: target,
-        correct: false,
-        centsError: 50,
-      );
-      _advance(judge);
-    }
+    // 设计：不超时跳走！等你弹对才前进（新手友好）。
+    // 不弹 → 一直停在这个音等你；弹错 → 显示偏差但不跳，继续等你弹对。
+    // （移除了原来的"超时判错自动跳走"逻辑）
   }
 
   void _advance(NoteJudgement judge) {
