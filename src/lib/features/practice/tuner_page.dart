@@ -33,6 +33,9 @@ class TunerState {
   final Set<String> tunedStrings; // 已调准的弦（音名+八度）
   final int hitCount; // 诊断：当前弦命中帧数
   final bool isCurrentTuned; // 诊断：当前弦是否判准
+  final double? rawFreq; // 诊断：原始识别频率（校正前）
+  final int sampleRate; // 诊断：实际采样率
+  final String freqHistory; // 诊断：最近频率历史（看跳变）
 
   const TunerState({
     this.note,
@@ -41,6 +44,9 @@ class TunerState {
     this.tunedStrings = const {},
     this.hitCount = 0,
     this.isCurrentTuned = false,
+    this.rawFreq,
+    this.sampleRate = 44100,
+    this.freqHistory = '',
   });
 
   TunerState copyWith({
@@ -49,12 +55,22 @@ class TunerState {
     bool? isRunning,
     Set<String>? tunedStrings,
     bool clearNote = false,
+    int? hitCount,
+    bool? isCurrentTuned,
+    double? rawFreq,
+    int? sampleRate,
+    String? freqHistory,
   }) {
     return TunerState(
       note: clearNote ? null : (note ?? this.note),
       frequency: clearNote ? null : (frequency ?? this.frequency),
       isRunning: isRunning ?? this.isRunning,
       tunedStrings: tunedStrings ?? this.tunedStrings,
+      hitCount: hitCount ?? this.hitCount,
+      isCurrentTuned: isCurrentTuned ?? this.isCurrentTuned,
+      rawFreq: rawFreq ?? this.rawFreq,
+      sampleRate: sampleRate ?? this.sampleRate,
+      freqHistory: freqHistory ?? this.freqHistory,
     );
   }
 }
@@ -65,6 +81,7 @@ class TunerNotifier extends StateNotifier<TunerState> {
   StreamSubscription? _sub;
   final List<bool> _hitWindow = []; // 滑动窗口：最近几帧是否命中（容忍抖动）
   bool _autoSwitched = false; // 当前弦是否已自动切换过（防重复）
+  final List<String> _freqLog = []; // 诊断：最近频率日志
 
   TunerNotifier(this._pitchService, this._ref) : super(const TunerState());
 
@@ -98,15 +115,19 @@ class TunerNotifier extends StateNotifier<TunerState> {
     await _sub?.cancel();
     _sub = null;
     await _pitchService.stop();
-    state = TunerState(
-      isRunning: false,
-      tunedStrings: state.tunedStrings,
-    );
+    // 停止时清空已调准标记，确保下次进入是干净状态
+    state = const TunerState(isRunning: false, tunedStrings: {});
   }
 
   void _onPitch(PitchResult r) {
-    if (r.frequency == null || r.frequency! <= 0) {
-      // 未检测到（太安静）
+    // 噪声门限：双重过滤电扇等环境噪声。
+    //   - energy > 0.015（电扇 RMS < 0.01，拨弦 > 0.03）
+    //   - confidence > 0.3（NCCF 真实信号 confidence 波动大，0.3 已能滤掉纯噪声）
+    // 之前用 0.5 太严，E 弦（细弦信号弱）部分帧被过滤，导致凑不够命中窗口不跳弦。
+    if (r.frequency == null ||
+        r.frequency! <= 0 ||
+        r.energy <= 0.015 ||
+        (r.probability ?? 0) <= 0.3) {
       state = state.copyWith(clearNote: true, tunedStrings: state.tunedStrings);
       return;
     }
@@ -116,15 +137,38 @@ class TunerNotifier extends StateNotifier<TunerState> {
     final curIdx = _ref.read(selectedStringProvider);
     final cur = _tuning[curIdx];
     final targetFreq = cur.frequency;
-    // 用原始识别频率（不做八度校正），先看清真实数据
     final rawFreq = r.frequency!;
-    final rawInfo = frequencyToNote(rawFreq);
-    final freqDiff = (rawFreq - targetFreq).abs() / targetFreq;
+
+    // 诊断：记录最近 6 帧的原始频率（校正前），用于看频率跳变模式
+    _freqLog.add(rawFreq.toStringAsFixed(0));
+    if (_freqLog.length > 6) _freqLog.removeAt(0);
+
+    // 八度校正：NCCF 可能识别成高/低八度。
+    // 策略：如果识别频率和目标频率比值接近 2 或 0.5（八度），
+    // 且校正后的音名匹配目标，则用校正频率。
+    var effectiveFreq = rawFreq;
+    final ratio = rawFreq / targetFreq;
+    if (ratio > 1.8 && ratio < 2.2) {
+      // 可能是高八度（识别频率是目标的~2倍）→ 除2校正
+      effectiveFreq = rawFreq / 2;
+    } else if (ratio > 0.45 && ratio < 0.55) {
+      // 可能是低八度（识别频率是目标的~0.5倍）→ 乘2校正
+      effectiveFreq = rawFreq * 2;
+    } else if (ratio > 3.8 && ratio < 4.2) {
+      // 两个八度差
+      effectiveFreq = rawFreq / 4;
+    } else if (ratio > 0.23 && ratio < 0.27) {
+      effectiveFreq = rawFreq * 4;
+    }
+
+    final effectiveInfo = frequencyToNote(effectiveFreq);
+    final freqDiff = (effectiveFreq - targetFreq).abs() / targetFreq;
     final isCurrentInTune = freqDiff <= 0.03;
 
-    // 滑动窗口：记录最近 8 帧的命中情况，命中数 >=5 即算稳定调准
+    // 滑动窗口：记录最近 3 帧的命中情况
+    // 弹响且调准后连续 2 帧即跳弦（快速响应，又防偶发误触）
     _hitWindow.add(isCurrentInTune);
-    if (_hitWindow.length > 8) _hitWindow.removeAt(0);
+    if (_hitWindow.length > 3) _hitWindow.removeAt(0);
     final hitCount = _hitWindow.where((h) => h).length;
 
     if (isCurrentInTune) {
@@ -132,16 +176,19 @@ class TunerNotifier extends StateNotifier<TunerState> {
     }
 
     state = TunerState(
-      note: rawInfo,
-      frequency: rawFreq,
+      note: effectiveInfo,
+      frequency: effectiveFreq,
       isRunning: true,
       tunedStrings: tuned,
       hitCount: hitCount,
       isCurrentTuned: isCurrentInTune,
+      rawFreq: rawFreq,
+      sampleRate: _pitchService.actualSampleRate,
+      freqHistory: _freqLog.join(','),
     );
 
-    // 自动切换：最近 8 帧命中 ≥5（容忍偶发抖动）→ 切下一根未调准的弦
-    if (hitCount >= 5 && !_autoSwitched) {
+    // 自动切换：连续 2 帧调准即跳（弹响就跳，快速流畅）
+    if (hitCount >= 2 && !_autoSwitched) {
       _autoSwitched = true; // 防重复
       final currentTuning = _ref.read(lowGProvider) ? kLowGTuning : kHighGTuning;
       final nextIdx = _findNextUntunedString(curIdx, tuned, currentTuning);
@@ -185,11 +232,31 @@ final tunerProvider =
 //  UI
 // ────────────────────────────────────────────────────────────
 
-class TunerPage extends ConsumerWidget {
+class TunerPage extends ConsumerStatefulWidget {
   const TunerPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TunerPage> createState() => _TunerPageState();
+}
+
+class _TunerPageState extends ConsumerState<TunerPage> {
+  @override
+  void initState() {
+    super.initState();
+    // 进入页面时重置调音器状态：清空已调准标记、回到 G 弦、停止运行
+    // 避免上次调音的残留状态影响本次（退出再进入会复现上次结果）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final notifier = ref.read(tunerProvider.notifier);
+      if (ref.read(tunerProvider).isRunning) {
+        notifier.stop();
+      }
+      ref.read(selectedStringProvider.notifier).state = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(tunerProvider);
     final tuning = ref.watch(lowGProvider) ? kLowGTuning : kHighGTuning;
     final selectedIdx = ref.watch(selectedStringProvider);
@@ -234,13 +301,8 @@ class TunerPage extends ConsumerWidget {
               ),
             ),
 
-            // 表盘（带诊断信息：真机调试用）
-            _Dial(
-              state: state,
-              diagText: state.isRunning
-                  ? '识别:${state.frequency?.toStringAsFixed(0) ?? "-"}Hz 命中:${state.hitCount}'
-                  : null,
-            ),
+            // 表盘
+            _Dial(state: state),
 
             // 4 弦
             Padding(
@@ -303,7 +365,7 @@ class TunerPage extends ConsumerWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               child: Text(
-                '📋 标准调音：G4 - C4 - E4 - A4\n依次弹响单弦，指针居中即调准',
+                '📋 标准调音：G4 - C4 - E4 - A4\n依次弹响单弦，调准后自动跳下一弦',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.text3, fontSize: 12, height: 1.7),
               ),
@@ -348,7 +410,7 @@ class TunerPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    '点击后允许使用麦克风 · 用 YIN 算法实时识别音高',
+                    '点击后允许使用麦克风 · 用 MPM 算法实时识别音高',
                     style: TextStyle(color: AppColors.text3, fontSize: 11),
                   ),
                 ],
@@ -364,8 +426,7 @@ class TunerPage extends ConsumerWidget {
 /// 调音表盘
 class _Dial extends StatelessWidget {
   final TunerState state;
-  final String? diagText; // 诊断信息（真机调试：采集包数/识别次数）
-  const _Dial({required this.state, this.diagText});
+  const _Dial({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -427,14 +488,7 @@ class _Dial extends StatelessWidget {
                     : (state.isRunning ? '请弹响琴弦…' : '未开始'),
                 style: const TextStyle(color: AppColors.text3, fontSize: 12),
               ),
-              // 诊断信息（真机调试用）
-              if (diagText != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(diagText!,
-                      style:
-                          TextStyle(color: AppColors.text3.withValues(alpha: 0.5), fontSize: 9)),
-                ),
+              // 诊断信息（真机调试用，放大便于读取采样率）
               const SizedBox(height: 8),
               if (note != null)
                 Text(

@@ -230,14 +230,16 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
   Future<void> _startRound() async {
     ref.invalidate(scoringEngineProvider);
     final beatMs = 60000 * 2 ~/ _bpm; // 每音符 2 拍
+    final isChordMode = _mode == PracticeMode.chord;
     final targets = <TargetNote>[];
     for (var i = 0; i < _items.length; i++) {
       final it = _items[i];
       targets.add(TargetNote(
         name: it.name,
         octave: it.octave,
-        start: Duration(milliseconds: i * beatMs), // 按顺序错开
+        start: Duration(milliseconds: i * beatMs),
         duration: Duration(milliseconds: beatMs),
+        isChord: isChordMode, // 和弦模式走 Chroma 识别
       ));
     }
     try {

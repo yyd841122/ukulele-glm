@@ -43,21 +43,36 @@ class ChordRecognizer {
   /// [sampleRate] 可覆盖构造时的采样率（用于 Web 实际采样率可能不同）
   ChordResult recognizeDetailed(List<double> samples, {int? sampleRate}) {
     final sr = sampleRate ?? _sampleRate;
+    final n = samples.length;
+
+    // 0. 预处理：DC 去除 + 一阶高通（与 NCCF 一致）
+    // 避免电扇低频噪声和麦克风 DC 偏移污染 FFT 频谱
+    double mean = 0;
+    for (final s in samples) {
+      mean += s;
+    }
+    mean /= n;
+    final processed = List<double>.filled(n, 0);
+    for (var i = 0; i < n; i++) {
+      final dc = samples[i] - mean;
+      processed[i] = i == 0 ? dc : dc - 0.97 * (samples[i - 1] - mean);
+    }
+
     // 1. 能量检查（噪声门限）
     double sumSq = 0;
-    for (final s in samples) {
+    for (final s in processed) {
       sumSq += s * s;
     }
-    final rms = math.sqrt(sumSq / samples.length);
+    final rms = math.sqrt(sumSq / n);
     if (rms < 0.012) {
       return const ChordResult(chord: null, bestMatch: null, score: 0, chroma: []);
     }
 
     // 2. 补零到 fftSize + 加汉宁窗
     final padded = List<double>.filled(_fftSize, 0);
-    final n = math.min(samples.length, _fftSize);
-    for (var i = 0; i < n; i++) {
-      padded[i] = samples[i] * _window[i];
+    final copyLen = math.min(n, _fftSize);
+    for (var i = 0; i < copyLen; i++) {
+      padded[i] = processed[i] * _window[i];
     }
 
     // 3. FFT
@@ -147,17 +162,18 @@ class ChordRecognizer {
   static Map<String, List<double>> _buildTemplates() {
     final result = <String, List<double>>{};
     for (var i = 0; i < 12; i++) {
-      // 大三和弦：根音 + 大三度(+4) + 纯五度(+7)
+      // 大三和弦：根音(加权) + 大三度(+4) + 纯五度(+7)
+      // 根音在扫弦中能量最强，给 2.0 权重让匹配更准
       final major = List<double>.filled(12, 0);
-      major[i] = 1; major[(i + 4) % 12] = 1; major[(i + 7) % 12] = 1;
+      major[i] = 2; major[(i + 4) % 12] = 1; major[(i + 7) % 12] = 1;
       result[kPitchClasses[i]] = major;
-      // 小三和弦：根音 + 小三度(+3) + 纯五度(+7)
+      // 小三和弦：根音(加权) + 小三度(+3) + 纯五度(+7)
       final minor = List<double>.filled(12, 0);
-      minor[i] = 1; minor[(i + 3) % 12] = 1; minor[(i + 7) % 12] = 1;
+      minor[i] = 2; minor[(i + 3) % 12] = 1; minor[(i + 7) % 12] = 1;
       result['${kPitchClasses[i]}m'] = minor;
-      // 属七和弦：根音 + 大三度(+4) + 纯五度(+7) + 小七度(+10)
+      // 属七和弦：根音(加权) + 大三度(+4) + 纯五度(+7) + 小七度(+10)
       final dom7 = List<double>.filled(12, 0);
-      dom7[i] = 1; dom7[(i + 4) % 12] = 1; dom7[(i + 7) % 12] = 1; dom7[(i + 10) % 12] = 1;
+      dom7[i] = 2; dom7[(i + 4) % 12] = 1; dom7[(i + 7) % 12] = 1; dom7[(i + 10) % 12] = 1;
       result['${kPitchClasses[i]}7'] = dom7;
     }
     return result;

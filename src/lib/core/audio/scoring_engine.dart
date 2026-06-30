@@ -10,8 +10,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../audio/music_utils.dart';
+import 'music_utils.dart';
 import '../audio/pitch_service.dart';
+import 'chord_recognizer.dart';
 
 /// 应弹的一个音符
 @immutable
@@ -20,12 +21,14 @@ class TargetNote {
   final int octave; // 八度，如 4
   final Duration start; // 在序列中的起始时间
   final Duration duration; // 持续时长
+  final bool isChord; // 是否为和弦（和弦模式走 Chroma 识别，单音走 NCCF）
 
   const TargetNote({
     required this.name,
     required this.octave,
     required this.start,
     required this.duration,
+    this.isChord = false,
   });
 
   double get frequency => noteToFrequency(name, octave);
@@ -87,10 +90,10 @@ class ScoringEngine extends StateNotifier<ScoringState> {
   StreamSubscription<PitchResult>? _sub;
   List<TargetNote> _notes = [];
   int _currentNoteIndex = 0;
-  int _matchStreak = 0; // 连续匹配帧数（防噪声误触发）
+  DateTime? _lastAdvanceTime; // 上次推进时间，用于冷却期防误触
 
-  /// 音准容差（cents）：|偏差| ≤ 此值视为弹对
-  static const int _toleranceCents = 25;
+  /// 和弦识别器（和弦模式用 Chroma 识别整和弦，而非单音匹配）
+  ChordRecognizer? _chordRecognizer;
 
   ScoringEngine(this._pitchService) : super(const ScoringState());
 
@@ -100,7 +103,7 @@ class ScoringEngine extends StateNotifier<ScoringState> {
   Future<void> start(List<TargetNote> notes) async {
     _notes = notes;
     _currentNoteIndex = 0;
-    _matchStreak = 0;
+    _lastAdvanceTime = null;
     state = ScoringState(isRunning: true, currentIndex: 0, judgements: []);
 
     _sub = _pitchService.pitchStream.listen(_onPitch);
@@ -149,42 +152,77 @@ class ScoringEngine extends StateNotifier<ScoringState> {
       return;
     }
     final target = _notes[_currentNoteIndex];
+    final isChord = target.isChord;
 
-    // 能量门限 + 频率合理性：过滤环境噪声
-    if (r.hasPitch && r.energy > 0.02 && r.frequency! >= 130 && r.frequency! <= 700) {
-      final info = frequencyToNote(r.frequency!);
-      // 放宽：只比音名（不卡八度，避免采样率导致的八度偏移误判）
-      final nameMatch = info.name == target.name;
-      if (nameMatch && info.cents.abs() <= _toleranceCents) {
-        // 滑动窗口：连续 2 帧匹配才算弹对（防环境噪声偶发误触发）
-        _matchStreak++;
-        if (_matchStreak >= 2) {
-          _matchStreak = 0;
-          final judge = NoteJudgement(
-            target: target,
-            correct: true,
-            centsError: info.cents.abs(),
-          );
-          _advance(judge);
-          return;
-        }
-      } else {
-        _matchStreak = 0;
+    // 单音模式用 frequency 匹配，和弦模式用 samples(Chroma) 匹配。
+    // 能量门限 0.02：过滤电扇等环境噪声（电扇 RMS < 0.01，拨弦 > 0.03）。
+    // 之前 0.0005 太低，电扇噪声也触发匹配导致一下子跳完。
+    final bool hasInput = isChord
+        ? (r.samples != null && r.samples!.isNotEmpty && r.energy > 0.02)
+        : (r.frequency != null && r.energy > 0.02);
+    if (hasInput) {
+      final matched = isChord
+          ? _matchChord(target, r)
+          : _matchSingleNote(target, r);
+
+      // 匹配即推进：弹响且音名对就跳下一音。
+      // 冷却期：推进后 300ms 内不响应新匹配，避免余音/快速连弹误触。
+      if (matched &&
+          (_lastAdvanceTime == null ||
+              DateTime.now().difference(_lastAdvanceTime!) >
+                  const Duration(milliseconds: 300))) {
+        _lastAdvanceTime = DateTime.now();
+        final judge = NoteJudgement(
+          target: target,
+          correct: true,
+          centsError: 0,
+        );
+        _advance(judge);
+        return;
       }
-      // 实时显示当前 cents 偏差
+    }
+
+    // 实时显示当前 cents 偏差（仅单音模式）
+    if (!isChord && r.frequency != null) {
+      final info = frequencyToNote(r.frequency!);
       state = ScoringState(
         isRunning: true,
         currentIndex: _currentNoteIndex,
         judgements: state.judgements,
         lastPitchCents: info.cents,
       );
-    } else {
-      _matchStreak = 0;
     }
 
     // 设计：不超时跳走！等你弹对才前进（新手友好）。
     // 不弹 → 一直停在这个音等你；弹错 → 显示偏差但不跳，继续等你弹对。
-    // （移除了原来的"超时判错自动跳走"逻辑）
+  }
+
+  /// 和弦模式匹配：用 Chroma 识别整和弦。
+  /// 匹配条件：识别结果 == 目标和弦，或目标和弦是最佳匹配且分数足够高。
+  bool _matchChord(TargetNote target, PitchResult r) {
+    _chordRecognizer ??= ChordRecognizer(_pitchService.actualSampleRate);
+    final result = _chordRecognizer!.recognizeDetailed(
+      r.samples!.toList(),
+      sampleRate: _pitchService.actualSampleRate,
+    );
+    // 完全匹配，或目标是最佳匹配且分数 > 0.6（放宽，Chroma 对扫弦有抖动）
+    return result.chord == target.name ||
+        (result.bestMatch == target.name && result.score > 0.6);
+  }
+
+  /// 单音模式匹配：频率落在目标音名（任意八度）的 ±2 半音内即匹配。
+  /// NCCF 对真实弱信号/短促信号不稳定，可能输出 C/C#/D 等相邻音名。
+  /// 用半音距离判定（而非精确音名相等），容忍 ±2 半音抖动。
+  bool _matchSingleNote(TargetNote target, PitchResult r) {
+    if (r.frequency == null || r.frequency! < 100 || r.frequency! > 2000) {
+      return false;
+    }
+    final info = frequencyToNote(r.frequency!);
+    // 精确音名匹配（忽略八度）。
+    // 之前用 ±2 半音太宽：C 弦余音(269Hz) 能匹配到相邻的 D(293Hz, 距 1.5 半音)，
+    // 导致弹一个音后余音把后续音全"匹配"了。改为精确音名相等。
+    // （八度由 frequencyToNote 的 midi 计算自动归类，269=C4，538=C5，音名都是 C）
+    return info.name == target.name;
   }
 
   void _advance(NoteJudgement judge) {
