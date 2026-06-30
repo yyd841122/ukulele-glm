@@ -27,6 +27,13 @@ class _RecordCapturer implements AudioCapturer {
     final frameBuffer = <int>[];
     var consumeOffset = 0;
 
+    // 权限检查：Android/iOS 必须先调 hasPermission() 触发系统授权弹窗，
+    // 否则 startStream 在无权限下静默失败、无数据（真机调音器无反应的根因）。
+    final granted = await _recorder.hasPermission();
+    if (!granted) {
+      throw Exception('麦克风权限被拒绝，请到系统设置 → 应用 → 尤克里里 → 权限，允许麦克风后重试');
+    }
+
     final stream = await _recorder.startStream(const RecordConfig(
       encoder: AudioEncoder.pcm16bits,
       sampleRate: _sampleRate,
