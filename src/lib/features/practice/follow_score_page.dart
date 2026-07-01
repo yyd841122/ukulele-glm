@@ -156,6 +156,134 @@ final List<PracticeSong> kSongs = [
       ]),
     ],
   ),
+  // ── 生日快乐 ──
+  PracticeSong(
+    title: '生日快乐',
+    artist: '经典英文歌 · 入门',
+    bpm: 90,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      // 旋律：C C D C F E（祝你生日快乐）
+      const PracticeLyric(text: '祝你生日快乐', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'E', beats: 2),
+      ]),
+      // 旋律：C C D C G F（祝你生日快乐）
+      const PracticeLyric(text: '祝你生日快乐', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 2),
+      ]),
+      // 旋律：C C C5 A F E D（亲爱的XX生日快乐）
+      const PracticeLyric(text: '亲爱的生日快乐', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 3),
+        PracticeChord(name: 'Am', position: 6),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 2),
+      ]),
+      // 旋律：B B A F G F（祝你生日快乐）
+      const PracticeLyric(text: '祝你生日快乐', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 4),
+      ], notes: [
+        PracticeNote(name: 'B', beats: 1), PracticeNote(name: 'B', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 两只老虎 ──
+  PracticeSong(
+    title: '两只老虎',
+    artist: '法国民谣 · 入门',
+    bpm: 100,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'G7': [0, 2, 1, 2],
+      'Am': [2, 0, 0, 0],
+    },
+    lyrics: [
+      // 旋律：C D E C（两只老虎）
+      const PracticeLyric(text: '两只老虎', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'C', beats: 1),
+      ]),
+      // 旋律：C D E C（两只老虎）
+      const PracticeLyric(text: '两只老虎', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'C', beats: 1),
+      ]),
+      // 旋律：E F G（跑得快）
+      const PracticeLyric(text: '跑得快', chords: [
+        PracticeChord(name: 'G', position: 0),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'G', beats: 2),
+      ]),
+      // 旋律：E F G（跑得快）
+      const PracticeLyric(text: '跑得快', chords: [
+        PracticeChord(name: 'G', position: 0),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'G', beats: 2),
+      ]),
+      // 旋律：G A G F E C（一只没有耳朵）
+      const PracticeLyric(text: '一只没有耳朵', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'C', beats: 1),
+      ]),
+      // 旋律：G A G F E C（一只没有尾巴）
+      const PracticeLyric(text: '一只没有尾巴', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G7', position: 4),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'C', beats: 1),
+      ]),
+      // 旋律：C G C（真奇怪）
+      const PracticeLyric(text: '真奇怪', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1, ),
+        PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      // 旋律：C G7 C（真奇怪）
+      const PracticeLyric(text: '真奇怪', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
 ];
 
 /// 应弹项（单音 或 和弦）
