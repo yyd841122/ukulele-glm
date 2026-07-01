@@ -3575,73 +3575,128 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
 
   Widget _buildChordHighway(double sw, double judgmentX, double pps) {
     final elapsed = _currentBeat * (60.0 / widget.bpm);
-    return Stack(children: _events.asMap().entries.map((e) {
-      final i = e.key; final event = e.value;
-      final dx = (event.timeSec - elapsed) * pps + judgmentX;
-      if (dx < -150 || dx > sw + 150) return const SizedBox.shrink();
-      final result = i < _results.length ? _results[i] : _ItemResult.pending;
-      final isCurrent = i == _currentIdx;
-      final isPast = i < _currentIdx;
-      Color bg = isCurrent ? AppColors.orange
-        : (result == _ItemResult.correct ? AppColors.ok.withValues(alpha: 0.3)
-        : (isPast ? Colors.white10 : Colors.white.withValues(alpha: 0.08)));
-      Color fg = isCurrent ? Colors.white
-        : (result == _ItemResult.correct ? AppColors.ok : Colors.white70);
-      return Positioned(left: dx, top: 35, bottom: 35, child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 和弦名
-          if (event.name.isNotEmpty)
-            Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8),
-                border: isCurrent ? Border.all(color: AppColors.orange, width: 2) : null),
-              child: Text(event.name, style: TextStyle(color: fg, fontSize: isCurrent ? 22 : 16, fontWeight: FontWeight.bold))),
-          const SizedBox(height: 4),
-          // 指法图
-          if (event.frets != null)
-            Container(width: isCurrent ? 54 : 40, height: isCurrent ? 54 : 40, padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
-              child: ChordDiagram(frets: event.frets!, fretCount: 5)),
-          const SizedBox(height: 6),
-          // 歌词
-          if (event.lyric != null && event.lyric!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(event.lyric!,
-                style: TextStyle(
-                  color: isCurrent ? Colors.white : (isPast ? AppColors.text3 : Colors.white60),
-                  fontSize: isCurrent ? 15 : 12,
-                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+    final beatSec = 60.0 / widget.bpm;
+    final screenH = MediaQuery.of(context).size.height;
+    final trackY = screenH * 0.45; // 轨道线 y 位置（屏幕中部偏上）
+
+    return Stack(children: [
+      // ── 背景轨道线 ──
+      // 主轨道基线（淡色水平线）
+      Positioned(
+        left: 0, right: 0, top: trackY,
+        child: Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      // 小节标记线（每隔 2 拍一条竖虚线）
+      ..._buildMeasureLines(sw, judgmentX, pps, elapsed, beatSec, trackY, screenH),
+      // 判定区高亮带（判定线附近的半透明区域）
+      Positioned(
+        left: judgmentX - 35, top: 30, bottom: 50,
+        child: Container(
+          width: 70,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.orange.withValues(alpha: 0.0), AppColors.orange.withValues(alpha: 0.08), AppColors.orange.withValues(alpha: 0.0)],
+            ),
+          ),
+        ),
+      ),
+      // ── 和弦卡片 ──
+      ..._events.asMap().entries.map((e) {
+        final i = e.key; final event = e.value;
+        final dx = (event.timeSec - elapsed) * pps + judgmentX;
+        if (dx < -150 || dx > sw + 150) return const SizedBox.shrink();
+        final result = i < _results.length ? _results[i] : _ItemResult.pending;
+        final isCurrent = i == _currentIdx;
+        final isPast = i < _currentIdx;
+        Color bg = isCurrent ? AppColors.orange
+          : (result == _ItemResult.correct ? AppColors.ok.withValues(alpha: 0.3)
+          : (isPast ? Colors.white10 : Colors.white.withValues(alpha: 0.06)));
+        Color fg = isCurrent ? Colors.white
+          : (result == _ItemResult.correct ? AppColors.ok : Colors.white70);
+        return Positioned(left: dx, top: 35, bottom: 35, child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 和弦名
+            if (event.name.isNotEmpty)
+              Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: bg, borderRadius: BorderRadius.circular(8),
+                  border: isCurrent ? Border.all(color: AppColors.orange, width: 2) : null,
+                  boxShadow: isCurrent ? [BoxShadow(color: AppColors.orange.withValues(alpha: 0.3), blurRadius: 10, spreadRadius: 1)] : null,
                 ),
+                child: Text(event.name, style: TextStyle(color: fg, fontSize: isCurrent ? 22 : 16, fontWeight: FontWeight.bold))),
+            const SizedBox(height: 4),
+            // 指法图
+            if (event.frets != null)
+              Container(width: isCurrent ? 54 : 40, height: isCurrent ? 54 : 40, padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(6),
+                  boxShadow: isCurrent ? [BoxShadow(color: AppColors.orange.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)] : null,
+                ),
+                child: ChordDiagram(frets: event.frets!, fretCount: 5)),
+            const SizedBox(height: 6),
+            // 歌词
+            if (event.lyric != null && event.lyric!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(event.lyric!,
+                  style: TextStyle(
+                    color: isCurrent ? Colors.white : (isPast ? AppColors.text3 : Colors.white60),
+                    fontSize: isCurrent ? 15 : 12,
+                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                  ),
                 textAlign: TextAlign.center,
               ),
             ),
-        ],
+          ],
+        ));
+      }).toList(),
+    ]);
+  }
+
+  /// 小节标记竖线
+  List<Widget> _buildMeasureLines(double sw, double judgmentX, double pps, double elapsed, double beatSec, double trackY, double screenH) {
+    final widgets = <Widget>[];
+    final totalBeats = (_totalDuration / beatSec).floor();
+    for (var beat = 0; beat <= totalBeats; beat += 2) {
+      final t = beat * beatSec;
+      final dx = (t - elapsed) * pps + judgmentX;
+      if (dx < 0 || dx > sw) continue;
+      widgets.add(Positioned(
+        left: dx,
+        top: 30, bottom: 50,
+        child: Container(
+          width: 1,
+          color: Colors.white.withValues(alpha: 0.05),
+        ),
       ));
-    }).toList());
+    }
+    return widgets;
   }
 
   Widget _buildTabHighway(double sw, double judgmentX, double pps) {
     final elapsed = _currentBeat * (60.0 / widget.bpm);
     final sColors = [const Color(0xFF4ADE80), const Color(0xFF60A5FA), const Color(0xFFF87171), const Color(0xFFFBBF24)];
     final sNames = ['G', 'C', 'E', 'A'];
-    // 弦线 y 坐标：在屏幕垂直方向均匀分布 4 条弦
     final screenH = MediaQuery.of(context).size.height;
-    final stringTop = screenH * 0.15; // 第一条弦距顶部
-    final stringGap = screenH * 0.15; // 弦间距
+    // 收窄弦间距：4 条弦集中在屏幕上方 40% 区域
+    final stringAreaH = screenH * 0.38; // 弦区总高度
+    final stringTop = screenH * 0.12; // 第一条弦距顶部
+    final stringGap = stringAreaH / 3; // 3 个间隔（4 条弦）
     double stringY(int si) => stringTop + si * stringGap;
 
     return Stack(children: [
-      // 四条弦线（固定背景）
+      // 四条弦线（固定背景，加淡色轨道）
       ...List.generate(4, (si) {
         final y = stringY(si);
         return Positioned(
-          left: 20, right: 0, top: y,
+          left: 0, right: 0, top: y,
           child: Row(children: [
+            const SizedBox(width: 16),
             SizedBox(width: 14, child: Text(sNames[si],
                 style: TextStyle(color: sColors[si], fontSize: 10, fontWeight: FontWeight.bold))),
             const SizedBox(width: 4),
-            Expanded(child: Container(height: 2, color: sColors[si].withValues(alpha: 0.3))),
+            Expanded(child: Container(height: 2, color: sColors[si].withValues(alpha: 0.25))),
           ]),
         );
       }),
@@ -3653,24 +3708,59 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
         final result = i < _results.length ? _results[i] : _ItemResult.pending;
         final isCurrent = i == _currentIdx;
         final isPast = i < _currentIdx;
-        final noteSize = isCurrent ? 28.0 : 24.0;
-        final y = stringY(event.stringIdx) + 1; // 弦线 center（弦线高 2px，中心+1）
+        final noteSize = isCurrent ? 26.0 : 22.0;
+        final y = stringY(event.stringIdx) + 1;
         Color nc = isCurrent ? AppColors.orange
           : (result == _ItemResult.correct ? AppColors.ok
           : (isPast ? Colors.white24 : sColors[event.stringIdx]));
         return Positioned(
           left: dx - noteSize / 2,
-          top: y - noteSize / 2, // 圆心对齐弦线
+          top: y - noteSize / 2,
           child: Container(width: noteSize, height: noteSize,
             decoration: BoxDecoration(color: nc, shape: BoxShape.circle,
               border: isCurrent ? Border.all(color: Colors.white, width: 2) : null),
             alignment: Alignment.center,
             child: Text('${event.fret}', style: TextStyle(
               color: isCurrent || isPast ? Colors.white : Colors.black87,
-              fontSize: isCurrent ? 16 : 13, fontWeight: FontWeight.bold))),
+              fontSize: isCurrent ? 15 : 12, fontWeight: FontWeight.bold))),
         );
       }),
+      // 歌词滚动区（弦线下方）
+      ..._buildTabLyrics(sw, judgmentX, pps, elapsed, stringTop + stringAreaH + 10),
     ]);
+  }
+
+  /// 单音版的歌词滚动
+  List<Widget> _buildTabLyrics(double sw, double judgmentX, double pps, double elapsed, double topY) {
+    // 从 widget.song.lyrics 关联歌词到音符事件
+    var noteIdx = 0;
+    final lyricEvents = <Widget>[];
+    for (final line in widget.song.lyrics) {
+      if (line.notes == null) continue;
+      for (final note in line.notes!) {
+        if (noteIdx >= _events.length) break;
+        final event = _events[noteIdx];
+        noteIdx++;
+        final dx = (event.timeSec - elapsed) * pps + judgmentX;
+        if (dx < -200 || dx > sw + 200) continue;
+        // 每个音符的歌词字（取歌词对应位置的字）
+        final charIdx = (noteIdx - 1) % line.text.length;
+        final char = line.text[charIdx];
+        final isCurrent = noteIdx - 1 == _currentIdx;
+        final result = noteIdx - 1 < _results.length ? _results[noteIdx - 1] : _ItemResult.pending;
+        lyricEvents.add(Positioned(
+          left: dx - 12,
+          top: topY,
+          child: Text(char, style: TextStyle(
+            color: isCurrent ? Colors.white
+              : (result == _ItemResult.correct ? AppColors.ok : Colors.white54),
+            fontSize: isCurrent ? 18 : 14,
+            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+          )),
+        ));
+      }
+    }
+    return lyricEvents;
   }
 
   Widget _buildRest() {
