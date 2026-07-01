@@ -624,9 +624,168 @@ final List<PracticeSong> kSongs = [
       ]),
     ],
   ),
+  // ── 茉莉花（中国民谣，公有领域）— C-G-Am-F ──
+  PracticeSong(
+    title: '茉莉花',
+    artist: '中国民谣 · 公有领域',
+    bpm: 80,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: '好一朵美丽的茉莉花', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+      ]),
+      const PracticeLyric(text: '好一朵美丽的茉莉花', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+      ]),
+      const PracticeLyric(text: '芬芳美丽满枝桠', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 5),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: '又香又白人人夸', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'C', position: 4),
+      ], notes: [
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 童年（示意段落）— C-G-Am-F ──
+  PracticeSong(
+    title: '童年',
+    artist: '罗大佑 · 示意段落',
+    bpm: 100,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: '池塘边的榕树上', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'Am', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: '知了在声声叫着夏天', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'G', position: 5),
+        PracticeChord(name: 'C', position: 9),
+      ], notes: [
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: '操场边的秋千上', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 4),
+      ], notes: [
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 2),
+      ]),
+      const PracticeLyric(text: '只有蝴蝶停在上面', chords: [
+        PracticeChord(name: 'G', position: 0),
+        PracticeChord(name: 'C', position: 5),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 隐形的翅膀（示意段落）— C-G-Am-F ──
+  PracticeSong(
+    title: '隐形的翅膀',
+    artist: '张韶涵 · 示意段落',
+    bpm: 80,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: '每一次都在徘徊孤单中坚强', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 6),
+        PracticeChord(name: 'Am', position: 11),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: '每一次就算很受伤', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 6),
+      ], notes: [
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2),
+      ]),
+      const PracticeLyric(text: '我知道我一直有双隐形的翅膀', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 7),
+        PracticeChord(name: 'G', position: 12),
+      ], notes: [
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: '带我飞飞过绝望', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+        PracticeChord(name: 'C', position: 8),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
 ];
-
-/// 按曲谱库标题查找练习歌曲
 PracticeSong? kSongsForPractice(String title) {
   for (final s in kSongs) {
     if (s.title == title) return s;
@@ -3199,7 +3358,21 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
     _pitchSub?.cancel();
     _animCtrl.dispose();
     ref.read(pitchServiceProvider).stop();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    // 恢复竖屏：用所有方向 + portraitUp 确保彻底解锁
+    // 之前只设 portraitUp 可能不生效（部分 Android 设备需要先解锁所有限制）
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    // 延迟再强制竖屏一次（确保页面切换完成后生效）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    });
     super.dispose();
   }
 
