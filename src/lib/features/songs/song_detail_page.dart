@@ -175,7 +175,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               },
             ),
           ),
-          // 底部跟弹评分条
+          // 底部练习按钮区
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
             decoration: BoxDecoration(
@@ -190,34 +190,69 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   style: TextStyle(fontSize: 11, color: AppColors.text3),
                 ),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    // 接入 FeatureGate：未开通弹付费墙，开通则进入跟弹评分
-                    onPressed: () async {
-                      final result = ref
-                          .read(featureGateProvider)
-                          .check(FeatureKey.followScore);
-                      if (result is Locked) {
-                        await showPaywall(context,
-                            feature: result.feature, reason: result.reason);
-                        return;
-                      }
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => const FollowScorePage()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.orange,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999)),
+                Row(
+                  children: [
+                    // 整曲弹唱（横屏）
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // 从曲谱库标题匹配练习歌曲
+                            final practiceSong = kSongsForPractice(widget.song.title);
+                            if (practiceSong != null) {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (_) => PracticeSongPicker(song: practiceSong),
+                              ));
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('这首歌曲暂不支持整曲弹唱，敬请期待')),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.teal,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                          ),
+                          child: const Text('🎵 整曲弹唱',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
                     ),
-                    child: const Text('🎤 开启跟弹评分',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
+                    const SizedBox(width: 10),
+                    // 跟弹评分
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final result = ref
+                                .read(featureGateProvider)
+                                .check(FeatureKey.followScore);
+                            if (result is Locked) {
+                              await showPaywall(context,
+                                  feature: result.feature, reason: result.reason);
+                              return;
+                            }
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const FollowScorePage()));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.orange,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999)),
+                          ),
+                          child: const Text('🎤 跟弹评分',
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -64,8 +64,16 @@ class Song {
   Color get color => Color(colorValue);
 }
 
-/// 8 首示例曲谱
+/// 示例曲谱（含 3 首可整曲弹唱的练习曲）
 const List<Song> kSongs = [
+  // 可整曲弹唱的入门曲
+  Song(id: 'p1', title: '小星星', artist: '英国民谣', emoji: '⭐', colorValue: 0xFFFCD34D, difficulty: SongDifficulty.beginner, tag: '入门', keyName: 'C', bpm: 80),
+  Song(id: 'p2', title: '生日快乐', artist: '经典英文歌', emoji: '🎂', colorValue: 0xFFFBCFE8, difficulty: SongDifficulty.beginner, tag: '入门', keyName: 'C', bpm: 90),
+  Song(id: 'p3', title: '两只老虎', artist: '法国民谣', emoji: '🐯', colorValue: 0xFFFCA5A5, difficulty: SongDifficulty.beginner, tag: '入门', keyName: 'C', bpm: 100),
+  Song(id: 'p4', title: '欢乐颂', artist: '贝多芬', emoji: '🎵', colorValue: 0xFFBEF264, difficulty: SongDifficulty.beginner, tag: '古典', keyName: 'C', bpm: 100),
+  Song(id: 'p5', title: '粉刷匠', artist: '波兰民谣', emoji: '🎨', colorValue: 0xFFFDBA74, difficulty: SongDifficulty.beginner, tag: '入门', keyName: 'C', bpm: 110),
+  Song(id: 'p6', title: '春天来了', artist: '童谣', emoji: '🌸', colorValue: 0xFFF9A8D4, difficulty: SongDifficulty.beginner, tag: '入门', keyName: 'C', bpm: 95),
+  // 其他曲谱
   Song(id: 's1', title: '小幸运', artist: '田馥甄', emoji: '🍀', colorValue: 0xFF86EFAC, difficulty: SongDifficulty.beginner, tag: '流行', keyName: 'C', bpm: 72),
   Song(id: 's2', title: '晴天', artist: '周杰伦', emoji: '☀️', colorValue: 0xFFFCD34D, difficulty: SongDifficulty.beginner, tag: '流行', keyName: 'G', bpm: 120),
   Song(id: 's3', title: 'Lemon', artist: '米津玄师', emoji: '🍋', colorValue: 0xFFFDE68A, difficulty: SongDifficulty.intermediate, tag: '日系', keyName: 'C', bpm: 88),

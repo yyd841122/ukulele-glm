@@ -284,9 +284,340 @@ final List<PracticeSong> kSongs = [
       ]),
     ],
   ),
+  // ── 欢乐颂（贝多芬第九交响曲，公有领域） ──
+  PracticeSong(
+    title: '欢乐颂',
+    artist: '贝多芬 · 公有领域',
+    bpm: 100,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      // 旋律：E E F G G F E D C C D E E D D
+      const PracticeLyric(text: '欢乐女神圣洁美丽', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+      ]),
+      const PracticeLyric(text: '灿烂光芒照大地', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'E', beats: 2), PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: '我们怀着火样热情', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+      ]),
+      const PracticeLyric(text: '来到你的圣殿里', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'C', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 2), PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 粉刷匠（波兰民谣，公有领域） ──
+  PracticeSong(
+    title: '粉刷匠',
+    artist: '波兰民谣 · 公有领域',
+    bpm: 110,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'G': [0, 2, 3, 2],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      // 旋律：G A G A G A E
+      const PracticeLyric(text: '我是一个粉刷匠', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      // 旋律：G A C5 A G E
+      const PracticeLyric(text: '粉刷本领强', chords: [
+        PracticeChord(name: 'G7', position: 0),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 2),
+      ]),
+      // 旋律：G A G A G A E
+      const PracticeLyric(text: '我要把那新房子', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      // 旋律：G A C5 A G E
+      const PracticeLyric(text: '刷得更漂亮', chords: [
+        PracticeChord(name: 'G7', position: 0),
+        PracticeChord(name: 'C', position: 3),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 春天来了（日本儿谣「春が来た」简化版） ──
+  PracticeSong(
+    title: '春天来了',
+    artist: '童谣 · 入门',
+    bpm: 95,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      // 旋律：C E G G A G E
+      const PracticeLyric(text: '春天来了春天来了', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      // 旋律：E G E D C
+      const PracticeLyric(text: '春天在哪里', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 3),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      // 旋律：G A G E D C
+      const PracticeLyric(text: '花儿都开了', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 2),
+      ]),
+      // 旋律：E G E D C
+      const PracticeLyric(text: '鸟儿都叫了', chords: [
+        PracticeChord(name: 'G', position: 0),
+        PracticeChord(name: 'C', position: 3),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
 ];
 
-/// 应弹项（单音 或 和弦）
+/// 按曲谱库标题查找练习歌曲
+PracticeSong? kSongsForPractice(String title) {
+  for (final s in kSongs) {
+    if (s.title == title) return s;
+  }
+  return null;
+}
+
+/// 整曲练习选择页（从曲谱详情页进入，选模式后跳横屏）
+class PracticeSongPicker extends StatefulWidget {
+  final PracticeSong song;
+  const PracticeSongPicker({super.key, required this.song});
+
+  @override
+  State<PracticeSongPicker> createState() => _PracticeSongPickerState();
+}
+
+class _PracticeSongPickerState extends State<PracticeSongPicker> {
+  bool _singleNote = false;
+  bool _accompaniment = true;
+  int _bpm = 80;
+  int _rounds = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _bpm = widget.song.bpm;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF111827),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: Colors.white,
+        title: Text('🎵 ${widget.song.title}', style: const TextStyle(fontSize: 16)),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.song.artist,
+                  style: const TextStyle(color: AppColors.text3, fontSize: 13)),
+              const SizedBox(height: 20),
+              // 模式选择
+              const Text('选择练习模式', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('和弦伴奏', style: TextStyle(fontSize: 13)),
+                    selected: !_singleNote,
+                    selectedColor: AppColors.orange,
+                    labelStyle: TextStyle(color: !_singleNote ? Colors.white : AppColors.text3),
+                    onSelected: (_) => setState(() => _singleNote = false),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('单音旋律', style: TextStyle(fontSize: 13)),
+                    selected: _singleNote,
+                    selectedColor: AppColors.teal,
+                    labelStyle: TextStyle(color: _singleNote ? Colors.white : AppColors.text3),
+                    onSelected: (_) => setState(() => _singleNote = true),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // BPM
+              Row(
+                children: [
+                  const Text('速度', style: TextStyle(color: AppColors.text3, fontSize: 13)),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () => setState(() { if (_bpm > 40) _bpm -= 5; }),
+                    child: Container(width: 32, height: 32,
+                      decoration: const BoxDecoration(color: Colors.white10, shape: BoxShape.circle),
+                      child: const Icon(Icons.remove, color: Colors.white, size: 18)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text('$_bpm', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))),
+                  GestureDetector(
+                    onTap: () => setState(() { if (_bpm < 140) _bpm += 5; }),
+                    child: Container(width: 32, height: 32,
+                      decoration: const BoxDecoration(color: Colors.white10, shape: BoxShape.circle),
+                      child: const Icon(Icons.add, color: Colors.white, size: 18)),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('BPM', style: TextStyle(color: AppColors.text3, fontSize: 11)),
+                  const Spacer(),
+                  // 配乐
+                  GestureDetector(
+                    onTap: () => setState(() => _accompaniment = !_accompaniment),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _accompaniment ? AppColors.teal.withValues(alpha: 0.3) : Colors.white10,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: _accompaniment ? AppColors.teal : Colors.transparent),
+                      ),
+                      child: Text(_accompaniment ? '🔊 配乐' : '🔇 静音',
+                          style: TextStyle(color: _accompaniment ? AppColors.teal : AppColors.text3, fontSize: 12)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // 循环次数
+              const Text('循环练习', style: TextStyle(color: AppColors.text3, fontSize: 13)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final r in [1, 3, 5])
+                    ChoiceChip(
+                      label: Text('$r 轮', style: const TextStyle(fontSize: 12)),
+                      selected: _rounds == r,
+                      selectedColor: AppColors.orange,
+                      labelStyle: TextStyle(color: _rounds == r ? Colors.white : AppColors.text3),
+                      onSelected: (_) => setState(() => _rounds = r),
+                    ),
+                ],
+              ),
+              const Spacer(),
+              // 歌词预览
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white10, borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('📜 歌词预览',
+                        style: const TextStyle(color: AppColors.teal, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...widget.song.lyrics.map((line) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Text(
+                        line.text + (line.notes != null
+                            ? '  (${line.notes!.map((n) => n.name).join(' ')})'
+                            : ''),
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 开始按钮
+              SizedBox(
+                width: double.infinity, height: 52,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => SongLandscapePage(
+                        song: widget.song,
+                        isSingleNote: _singleNote,
+                        accompaniment: _accompaniment,
+                        bpm: _bpm,
+                        rounds: _rounds,
+                      ),
+                    ));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.orange, foregroundColor: Colors.white, elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                  ),
+                  child: const Text('🎵 开始弹唱（横屏）',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 @immutable
 class PracticeItem {
   final String label; // 显示名：单音 "C4"、和弦 "C"
