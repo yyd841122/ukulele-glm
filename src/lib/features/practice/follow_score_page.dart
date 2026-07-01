@@ -3518,6 +3518,11 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
   void _quit() {
     _beatTimer?.cancel();
     _pitchSub?.cancel();
+    // 退出前先恢复竖屏（比 dispose 更可靠，此时 widget 还活着）
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     Navigator.of(context).pop();
   }
 
@@ -3715,7 +3720,10 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
           ]))),
         const SizedBox(height: 28),
         SizedBox(width: 200, height: 44, child: ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+            Navigator.of(context).pop();
+          },
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.orange, foregroundColor: Colors.white, elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
           child: const Text('返回', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
