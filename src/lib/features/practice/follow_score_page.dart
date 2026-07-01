@@ -433,6 +433,197 @@ final List<PracticeSong> kSongs = [
       ]),
     ],
   ),
+  // ── 送别（李叔同填词，公有领域）— 使用 Dm/Em/A7，进阶和弦 ──
+  PracticeSong(
+    title: '送别',
+    artist: '李叔同填词 · 公有领域',
+    bpm: 75,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+      'Dm': [2, 2, 1, 0],
+      'Em': [0, 4, 3, 2],
+      'A7': [0, 1, 0, 0],
+      'E7': [1, 2, 0, 2],
+    },
+    lyrics: [
+      const PracticeLyric(text: '长亭外古道边', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'Dm', position: 3),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 2),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: '芳草碧连天', chords: [
+        PracticeChord(name: 'Em', position: 0),
+        PracticeChord(name: 'Am', position: 3),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 2), PracticeNote(name: 'G', beats: 2),
+      ]),
+      const PracticeLyric(text: '晚风拂柳笛声残', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 4),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: '夕阳山外山', chords: [
+        PracticeChord(name: 'Dm', position: 0),
+        PracticeChord(name: 'A7', position: 2),
+        PracticeChord(name: 'Dm', position: 4),
+      ], notes: [
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 2), PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 铃儿响叮当（Jingle Bells，公有领域）— 使用 C/G7/D7 ──
+  PracticeSong(
+    title: '铃儿响叮当',
+    artist: 'Jingle Bells · 公有领域',
+    bpm: 110,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+      'D7': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'Dashing through the snow', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: 'In a one-horse open sleigh', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: 'O\'er the fields we go', chords: [
+        PracticeChord(name: 'G7', position: 0),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: 'Laughing all the way', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'F', position: 3),
+        PracticeChord(name: 'C', position: 6),
+      ], notes: [
+        PracticeNote(name: 'F', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── Oh Susanna（Foster，公有领域）— 使用 C/G7/Em/A7/D7 ──
+  PracticeSong(
+    title: 'Oh Susanna',
+    artist: 'Stephen Foster · 公有领域',
+    bpm: 110,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+      'Em': [0, 4, 3, 2],
+      'A7': [0, 1, 0, 0],
+      'D7': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'Oh I come from Alabama', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: 'With my banjo on my knee', chords: [
+        PracticeChord(name: 'G7', position: 0),
+        PracticeChord(name: 'C', position: 3),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: 'I\'m going to Louisiana', chords: [
+        PracticeChord(name: 'Em', position: 0),
+        PracticeChord(name: 'A7', position: 3),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: 'My true love for to see', chords: [
+        PracticeChord(name: 'D7', position: 0),
+        PracticeChord(name: 'G7', position: 3),
+        PracticeChord(name: 'C', position: 6),
+      ], notes: [
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 摇篮曲（Brahms，公有领域）— 使用 F/Dm/Bb/G7 进阶和弦 ──
+  PracticeSong(
+    title: '摇篮曲',
+    artist: 'Brahms · 公有领域',
+    bpm: 60,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+      'Dm': [2, 2, 1, 0],
+      'Bb': [3, 1, 1, 1],
+      'Am': [2, 0, 0, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'Lullaby and good night', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 3),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'F', beats: 2),
+        PracticeNote(name: 'A', beats: 2), PracticeNote(name: 'G', beats: 2),
+      ]),
+      const PracticeLyric(text: 'With roses bedight', chords: [
+        PracticeChord(name: 'Dm', position: 0),
+        PracticeChord(name: 'Am', position: 3),
+      ], notes: [
+        PracticeNote(name: 'F', beats: 2), PracticeNote(name: 'A', beats: 2),
+        PracticeNote(name: 'C', octave: 5, beats: 2), PracticeNote(name: 'A', beats: 2),
+      ]),
+      const PracticeLyric(text: 'With lilies o\'erspread', chords: [
+        PracticeChord(name: 'Bb', position: 0),
+        PracticeChord(name: 'F', position: 4),
+      ], notes: [
+        PracticeNote(name: 'A', beats: 2), PracticeNote(name: 'G', beats: 2),
+        PracticeNote(name: 'F', beats: 2), PracticeNote(name: 'A', beats: 2),
+      ]),
+      const PracticeLyric(text: 'Beneath is thy bed', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G7', position: 3),
+        PracticeChord(name: 'C', position: 6),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'E', beats: 2),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
 ];
 
 /// 按曲谱库标题查找练习歌曲

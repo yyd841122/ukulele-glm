@@ -35,21 +35,69 @@ class UkuleleChord {
   });
 }
 
-/// 预置常用和弦（指法 G-C-E-A）
+/// 预置常用和弦（指法 G-C-E-A，值 0=空弦, 1+=按品, -1=不弹）
+/// 尤克里里标准调音 High-G: G4 C4 E4 A4
 const List<UkuleleChord> kChords = [
+  // ── 大三和弦（Major）──
   UkuleleChord(name: 'C', difficulty: ChordDifficulty.basic, frets: [0, 0, 0, 3]),
-  UkuleleChord(name: 'Am', difficulty: ChordDifficulty.basic, frets: [2, 0, 0, 0]),
+  UkuleleChord(name: 'D', difficulty: ChordDifficulty.advanced, frets: [2, 2, 2, 0]),
+  UkuleleChord(name: 'E', difficulty: ChordDifficulty.advanced, frets: [4, 4, 4, 2]),
   UkuleleChord(name: 'F', difficulty: ChordDifficulty.basic, frets: [2, 0, 1, 0]),
   UkuleleChord(name: 'G', difficulty: ChordDifficulty.basic, frets: [0, 2, 3, 2]),
-  UkuleleChord(name: 'Em', difficulty: ChordDifficulty.basic, frets: [0, 4, 3, 2]),
-  UkuleleChord(name: 'Dm', difficulty: ChordDifficulty.basic, frets: [2, 2, 1, 0]),
   UkuleleChord(name: 'A', difficulty: ChordDifficulty.basic, frets: [2, 1, 0, 0]),
+  UkuleleChord(name: 'B', difficulty: ChordDifficulty.advanced, frets: [4, 3, 2, 2]),
+  UkuleleChord(name: 'Bb', difficulty: ChordDifficulty.advanced, frets: [3, 1, 1, 1]),
+  UkuleleChord(name: 'Eb', difficulty: ChordDifficulty.advanced, frets: [3, 3, 3, 1]),
+  UkuleleChord(name: 'Ab', difficulty: ChordDifficulty.advanced, frets: [5, 3, 4, 3]),
+
+  // ── 小三和弦（Minor）──
+  UkuleleChord(name: 'Am', difficulty: ChordDifficulty.basic, frets: [2, 0, 0, 0]),
+  UkuleleChord(name: 'Dm', difficulty: ChordDifficulty.basic, frets: [2, 2, 1, 0]),
+  UkuleleChord(name: 'Em', difficulty: ChordDifficulty.basic, frets: [0, 4, 3, 2]),
+  UkuleleChord(name: 'Bm', difficulty: ChordDifficulty.advanced, frets: [4, 2, 2, 2]),
+  UkuleleChord(name: 'F#m', difficulty: ChordDifficulty.advanced, frets: [2, 1, 2, 0]),
+  UkuleleChord(name: 'C#m', difficulty: ChordDifficulty.advanced, frets: [1, 1, 0, 4]),
+  UkuleleChord(name: 'G#m', difficulty: ChordDifficulty.advanced, frets: [1, 1, 2, 4]),
+  UkuleleChord(name: 'Ebm', difficulty: ChordDifficulty.advanced, frets: [3, 3, 2, 1]),
+
+  // ── 属七和弦（Dominant 7th）──
   UkuleleChord(name: 'G7', difficulty: ChordDifficulty.advanced, frets: [0, 2, 1, 2]),
   UkuleleChord(name: 'C7', difficulty: ChordDifficulty.advanced, frets: [0, 0, 0, 1]),
-  UkuleleChord(name: 'Cmaj7', difficulty: ChordDifficulty.advanced, frets: [0, 0, 0, 2]),
-  UkuleleChord(name: 'D', difficulty: ChordDifficulty.advanced, frets: [2, 2, 2, 0]),
+  UkuleleChord(name: 'D7', difficulty: ChordDifficulty.advanced, frets: [2, 0, 1, 0]),
   UkuleleChord(name: 'E7', difficulty: ChordDifficulty.advanced, frets: [1, 2, 0, 2]),
+  UkuleleChord(name: 'A7', difficulty: ChordDifficulty.advanced, frets: [0, 1, 0, 0]),
+  UkuleleChord(name: 'B7', difficulty: ChordDifficulty.advanced, frets: [2, 1, 2, 2]),
+  UkuleleChord(name: 'F#7', difficulty: ChordDifficulty.advanced, frets: [2, 3, 2, 3]),
+
+  // ── 大七和弦（Major 7th）──
+  UkuleleChord(name: 'Cmaj7', difficulty: ChordDifficulty.advanced, frets: [0, 0, 0, 2]),
+  UkuleleChord(name: 'Fmaj7', difficulty: ChordDifficulty.advanced, frets: [5, 5, 5, 7]),
+  UkuleleChord(name: 'Gmaj7', difficulty: ChordDifficulty.advanced, frets: [0, 2, 2, 2]),
+  UkuleleChord(name: 'Amaj7', difficulty: ChordDifficulty.advanced, frets: [1, 1, 0, 4]),
+
+  // ── 小七和弦（Minor 7th）──
+  UkuleleChord(name: 'Am7', difficulty: ChordDifficulty.advanced, frets: [0, 0, 0, 0]),
+  UkuleleChord(name: 'Dm7', difficulty: ChordDifficulty.advanced, frets: [2, 2, 1, 3]),
+  UkuleleChord(name: 'Em7', difficulty: ChordDifficulty.advanced, frets: [0, 2, 0, 2]),
+  UkuleleChord(name: 'Bm7', difficulty: ChordDifficulty.advanced, frets: [2, 2, 2, 0]),
+
+  // ── 挂留和弦（Sus）──
+  UkuleleChord(name: 'Dsus4', difficulty: ChordDifficulty.advanced, frets: [2, 2, 3, 0]),
+  UkuleleChord(name: 'Asus4', difficulty: ChordDifficulty.advanced, frets: [2, 2, 0, 0]),
+
+  // ── 减/增和弦 ──
+  UkuleleChord(name: 'Bdim', difficulty: ChordDifficulty.advanced, frets: [3, 2, 2, 0]),
+  UkuleleChord(name: 'Caug', difficulty: ChordDifficulty.advanced, frets: [1, 0, 0, 3]),
 ];
+
+/// 全局和弦指法查找表：和弦名 → [G, C, E, A] 指法
+/// 所有歌曲共用，避免每首歌重复定义
+final Map<String, List<int>> kChordFretMap = {
+  for (final c in kChords) c.name: c.frets,
+};
+
+/// 查找和弦指法，找不到返回 null
+List<int>? chordFretsOf(String name) => kChordFretMap[name];
 
 // ────────────────────────────────────────────────────────────
 //  Riverpod
