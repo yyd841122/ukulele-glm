@@ -16,6 +16,7 @@ import '../../core/audio/chord_recognizer.dart';
 import '../../core/audio/music_utils.dart';
 import '../../core/audio/pitch_service.dart';
 import '../../core/audio/scoring_engine.dart';
+import '../../core/audio/strum_engine.dart';
 import '../../core/audio/tone_player.dart';
 import '../../core/game/game_service.dart';
 import '../../core/monetization/feature_gate.dart';
@@ -3326,6 +3327,7 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
   Timer? _beatTimer;
   StreamSubscription<PitchResult>? _pitchSub;
   ChordRecognizer? _recognizer;
+  StrumPatternScheduler? _strumScheduler; // 扫弦节奏型调度器（和弦版配乐）
 
   List<_TimelineEvent> _events = [];
   double _totalDuration = 0;
@@ -3356,6 +3358,7 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
   void dispose() {
     _beatTimer?.cancel();
     _pitchSub?.cancel();
+    _strumScheduler?.stop();
     _animCtrl.dispose();
     ref.read(pitchServiceProvider).stop();
     // 恢复竖屏：用所有方向 + portraitUp 确保彻底解锁
@@ -3439,9 +3442,22 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
       _pitchSub = ref.read(pitchServiceProvider).pitchStream.listen(_onPitch);
     }).catchError((_) {});
 
+    // 配乐：和弦版用扫弦节奏型调度器，单音版用逐音 playTone
+    _strumScheduler?.stop();
+    if (!widget.isSingleNote && _accompanimentOn && _events.isNotEmpty) {
+      final frets = _events[0].frets ?? [0, 0, 0, 3];
+      _strumScheduler = StrumPatternScheduler(
+        bpm: widget.bpm,
+        pattern: kPatternFolk,
+        volume: 0.12,
+      );
+      _strumScheduler!.setChord(frets);
+      _strumScheduler!.start();
+    }
+
     _animCtrl.forward();
     final beatMs = 60000 ~/ widget.bpm;
-    _playAccompaniment();
+    if (widget.isSingleNote) _playAccompaniment();
     _beatTimer = Timer.periodic(Duration(milliseconds: beatMs), (_) => _onBeat());
   }
 
@@ -3461,7 +3477,12 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
           _onRoundEnd();
           return;
         }
-        _playAccompaniment();
+        // 切换配乐：和弦版更新扫弦调度器，单音版逐音播放
+        if (widget.isSingleNote) {
+          _playAccompaniment();
+        } else if (_strumScheduler != null && _events[_currentIdx].frets != null) {
+          _strumScheduler!.setChord(_events[_currentIdx].frets!);
+        }
       }
     }
     setState(() {});
@@ -3502,6 +3523,7 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
   void _onRoundEnd() {
     _beatTimer?.cancel();
     _pitchSub?.cancel();
+    _strumScheduler?.stop();
     ref.read(pitchServiceProvider).stop();
     _animCtrl.stop();
     final correct = _results.where((r) => r == _ItemResult.correct).length;
@@ -3518,6 +3540,7 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
   void _quit() {
     _beatTimer?.cancel();
     _pitchSub?.cancel();
+    _strumScheduler?.stop();
     // 退出前先恢复竖屏（比 dispose 更可靠，此时 widget 还活着）
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
