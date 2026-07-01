@@ -1,8 +1,8 @@
 # TDD · 尤克里里 AI 学园 — 技术方案设计文档
 
-> **文档版本**：v1.0  ｜  **创建**：2026-06-26
-> **配套**：`PRD.md` §4 技术需求  ｜  **重点章节**：§3 乐音识别技术选型
-> **状态**：方案已定，待 MVP 验证
+> **文档版本**：v2.0  ｜  **创建**：2026-06-26  ｜  **更新**：2026-07-01
+> **配套**：`PRD.md` §4 技术需求  ｜  **重点章节**：§3 乐音识别技术选型、§3.7 整曲节奏模式
+> **状态**：音频引擎 v2.0 已验证（NCCF + AudioWorklet），整曲节奏模式开发中
 
 ---
 
@@ -98,56 +98,70 @@
 | **OneBitPitch** | 超高速 | 极低 | 良 | ✅ 优秀 | ⭐⭐ |
 | **FFT 峰值** | 频域 | 中 | 差（泛音误判） | ✅ 但不可靠 | ⭐⭐ |
 
-### 3.3 决策结论：**YIN**
+### 3.3 决策结论：~~YIN~~ → **NCCF + AudioWorklet 直采**（v2.0 架构升级）
 
-**为什么选 YIN？**
-1. **延迟可控且可计算**：YIN 在时域做自相关，理论延迟 ≈ 2 × 最低检测频率的周期。对尤克里里最低 Low-G（G3≈196Hz，周期≈5.1ms），缓冲窗 1024~2048 samples（@44.1k 即 23~46ms）即可覆盖，**端到端 < 100ms 完全可达**。
-2. **单乐器单声道场景精度足够**：尤克里里旋律/和弦根音识别是单音（monophonic）场景，YIN 表现优秀；调音时更是纯正单音，精度可达 ±1 cent 级。
-3. **实现成熟、可移植**：YIN 有 TarsosDSP（Java）、pitch-detection（Rust）、pitch_detector_dart（Dart）、pitchfinder（JS，原型用）等多语言实现，移植/自研风险低。
-4. **CPU 占用低**：时域算法，移动端实时跑无压力，省电。
-5. **与节奏识别天然协同**：onset 检测也基于同一时域能量流，零额外采集成本。
+> **⚠️ 架构变更（2026-07-01）**：初版选用 YIN，但实测在真实麦克风信号上存在严重不稳定
+>（采样率黑盒、泛音锁定、瞬态失败）。经多轮调研验证后，改为 **NCCF（归一化自相关）
+> + 信号预处理流水线 + AudioWorklet 直采**方案。详见 [ADR-003](DECISIONS/ADR-003-nccf-audioworklet.md)。
 
-**为什么不选 CREPE 做实时主算法？**
-- CREPE 精度最高，但它是 6 层 CNN 在原始音频上推理，**移动端实时推理延迟通常 > 100ms 且耗电高**，违反延迟指标；
-- 它更适合**离线/云端**对复杂弹唱（多音、和弦）做高精度评测兜底，作为 V2+ 能力。
+**为什么从 YIN 改为 NCCF + 预处理流水线？**
+1. **YIN 的八度误差**：YIN 在尤克里里真实信号上系统性偏八度（G 弦识别成 F#），且频率偏移无法消除。
+2. **record 包采样率黑盒**：record 包在 Web 上自管 AudioContext，外部探测的采样率和实际数据采样率对不上，导致频率系统性偏移。**根本解法是 Web 端抛弃 record 包，用 AudioWorklet 直采**。
+3. **NCCF + 预处理更鲁棒**：NCCF（归一化自相关）配合业界标准预处理（DC去除+高通+中心削波）+ 后处理（RMS门限+状态机+中值平滑），对真实麦克风信号稳定可靠。
 
-**为什么不选纯 FFT 峰值法？**
-- 尤克里里音色泛音丰富，FFT 峰值法极易把**泛音误判为基音**（八度错判），不可靠。
+**新算法的关键参数**：NCCF maxFrequency=600Hz（排除泛音）、confidence 阈值 0.5、RMS 门限 0.01、attack/stable/release 状态机。
 
-### 3.4 架构设计：三层音频引擎
+**为什么不选 CREPE / 纯 FFT？**
+- CREPE 精度最高但移动端实时推理延迟 > 100ms，留作 V2 云端兜底。
+- 纯 FFT 峰值法对泛音丰富的尤克里里极易八度错判。
+
+### 3.4 架构设计：音频引擎（v2.0 重写版）
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ L3  UI 反馈层  (Flutter/Dart)                            │
-│     接收评分事件 → 渲染 ✓/✗/仪表盘/滚动谱               │
+│     调音器/跟弹/和弦转换/整曲 → 渲染反馈                  │
 ├─────────────────────────────────────────────────────────┤
 │ L2  评分编排层  (Dart, 平台无关)                          │
-│     ① 音高序列 → 与曲谱应弹音符对齐(时间窗) → 音准分     │
-│     ② onset 时间戳 → 与节拍网格对齐 → 节奏分            │
-│     ③ 平滑/去抖 → 输出事件流                            │
+│     PitchDetectionService:                               │
+│       ① RMS 门限过滤（电扇等噪声）                        │
+│       ② NCCF confidence 过滤                             │
+│       ③ attack/stable/release 状态机（瞬态兜底）          │
+│       ④ 3 帧中值平滑（抑制跳变）                          │
+│     ScoringEngine: 单音/和弦匹配 + 冷却期                 │
 ├─────────────────────────────────────────────────────────┤
-│ L1  原生音频层  (iOS Swift / Android Kotlin) ← 关键      │
-│     低延迟 PCM 采集 + YIN 实现 + Onset 检测              │
-│     通过 Platform Channel / FFI 把事件回调给 Dart        │
+│ L1b 音高检测  (纯 Dart, 跨平台)                           │
+│     NccfDetector:                                        │
+│       预处理(DC去+高通+削波) → NCCF → 第一个显著峰        │
+│       → 抛物线插值 → frequency + confidence               │
+├─────────────────────────────────────────────────────────┤
+│ L1a 音频采集  (条件导入, 平台分流)                        │
+│     Web: AudioWorklet 直采 (pitch_worklet.js)             │
+│           → AudioContext.sampleRate 为采样率真值           │
+│     移动: record 包 (hasPermission + startStream)         │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**为什么 L1 用原生而非纯 Dart？**
-- `pitch_detector_dart` 等纯 Dart 包可用，但 Dart 层做音频缓冲易受 GC/事件循环抖动影响，**延迟与稳定性不如原生**；
-- 我们的延迟指标严苛（<100ms），原生（Swift `AVAudioEngine` / Kotlin `AudioRecord`）可控性最高；
-- **渐进策略**：先用 `flutter_pitch_detection`/`pitch_detector_plus` 快速跑通 MVP 原型，**性能不达标再下沉原生**。
+**为什么 L1a Web 端用 AudioWorklet 而非 record 包？**
+- record 包在 Web 上是采样率黑盒（自管 AudioContext + 内部重采样），外部永远拿不到真实采样率；
+- AudioWorklet 直采：自己控制 AudioContext，sampleRate 100% 确定，采样率不再需要探测。
 
-### 3.5 关键参数（L1 原生层）
+**为什么 L1b 用纯 Dart NCCF 而非原生？**
+- 实测 Dart 层 NCCF + 预处理每帧约 3-5ms，满足 <100ms 延迟指标；
+- 纯 Dart 跨平台一致（Web/Android/iOS 行为相同），无需维护三套原生代码。
+
+### 3.5 关键参数
 
 | 参数 | 取值 | 说明 |
 |------|------|------|
-| 采样率 | **44100 Hz**（或 48000） | 标准音频采样率 |
-| 缓冲帧数 | **2048 samples（≈46ms@44.1k）** | 延迟与精度平衡点；可调 |
+| 采样率 | Web: AudioContext.sampleRate（通常 48000）；移动: 44100 | 采集层提供真值，不再探测 |
+| 缓冲帧数 | **2048 samples** | 延迟与精度平衡点 |
 | 重叠 | 50% | 提升时间分辨率，平滑识别 |
-| YIN 阈值 | 0.10 – 0.15 | 越低越严格，调音场景用低值 |
-| 最小频率 | 70 Hz | 覆盖 Low-G 及降调余量 |
-| 最大频率 | 1200 Hz | 覆盖到 C6 |
-| Onset 算法 | 基于光谱通量(spectral flux) | 检测弹奏起音 |
+| NCCF maxFrequency | **600 Hz** | 排除高次泛音（尤克里里基频 < 523Hz） |
+| NCCF confidence 阈值 | **0.5** | 过滤低质量检测（噪声 < 0.5） |
+| RMS 门限 | **0.01** | 过滤电扇等环境噪声（拨弦 > 0.03） |
+| 状态机 | attack/stable/release | 拨弦瞬态用上一稳定值兜底 |
+| 中值平滑窗口 | 3 帧 | 抑制单帧跳变 |
 
 ### 3.6 评分模型（L2）
 
@@ -163,15 +177,93 @@ cents = 1200 * log2(f / f0)
 
 **总分** = 加权（音准 0.6 + 节奏 0.4，权重可配置）。
 
-### 3.7 风险与缓解
+### 3.7 整曲节奏模式（流水滚动跟弹）⭐ 新增
+
+> 对标 AI 音乐学园核心体验：配乐按 BPM 流水滚动，按节奏走不停（不等用户）。
+> 分**和弦伴奏版**和**单音旋律版**两种 UI 范式，均横屏。
+
+#### 3.7.1 核心理念
+
+从"弹对才走"（逐音等待）→ "按节奏流水走动"（节奏驱动）：
+- 配乐按 BPM 自动播放和弦/旋律序列
+- 歌词+曲谱+指法图按节奏从右向左滚动（判定线固定在屏幕中央）
+- 在每个和弦/音符的时间窗口内实时判定用户弹的对错
+- 弹对→变绿，弹错→标红，没弹到→标灰，但传送带不停
+
+#### 3.7.2 两种 UI 范式
+
+**和弦伴奏版（路线 A：和弦谱滚动）**
+```
+横屏 ← 滚动方向（从右向左）←
+
+         判定线
+           ↓
+  C          G          Am         F
+ [指法图]  [指法图]   [指法图]  [指法图]   ← 第1行：指法图（小，40×40）
+ 一闪一闪   亮晶晶     满天      都是      ← 第2行：歌词
+```
+- 和弦名 + 指法图 + 歌词三层垂直对齐，同步滚动
+- 到达判定线时高亮 + 配乐提示
+- 判定走 Chroma 和弦识别
+
+**单音旋律版（路线 B：四线谱 TAB 滚动）**
+```
+横屏 ← 音符从右向左滚 ←
+
+  A弦 ──────3──────0──────────2─────  ← 数字=按第几品
+  E弦 ──────────────────1───────0────
+  C弦 ────0──────2───────────────────
+  G弦 ───────────────0───────────────
+                     ↑ 判定线
+```
+- 4 条弦各一行（G/C/E/A 四色），数字标注品数
+- 到达判定线时弹对应音
+- 判定走 NCCF 单音识别（音名匹配，不要求精确弦+品）
+
+#### 3.7.3 数据结构（时间轴驱动）
+
+```dart
+class PracticeChord {
+  final String name;       // 和弦名
+  final int position;      // 歌词字符位置
+  final int beats;         // 持续拍数（节奏驱动核心）
+}
+class PracticeNote {
+  final String name;       // 音名
+  final int octave;
+  final int beats;         // 持续拍数
+}
+class PracticeSong {
+  final int bpm;           // 建议速度
+  final List<PracticeLyric> lyrics;
+  final Map<String, List<int>> chordFrets;  // 和弦→指法[G,C,E,A]
+}
+```
+
+#### 3.7.4 节奏引擎（PracticeSongTracker）
+
+- 启动时按 BPM 累加每个和弦/音符的时间点（`beats × 60000/bpm`）
+- `Timer.periodic`（每拍）驱动"当前指针"前进，同时播放配乐
+- 麦克风并行识别：每个时间窗口内匹配→标 correct，窗口结束未匹配→标 skip
+- 配乐用 tone_player（拨弦音色），音量可控，可开关
+
+#### 3.7.5 BPM 可调
+
+用户可在开始前调速度（慢速 50 → 原速 80 → 快速 120），适配不同水平。
+
+#### 3.7.6 横屏锁定
+
+进入整曲模式时 `SystemChrome.setPreferredOrientations([landscape])`，退出时恢复。
+
+### 3.8 风险与缓解
 
 | 风险 | 缓解措施 |
 |------|---------|
-| 实时延迟超标 | L1 原生实现；缓冲参数可调；先 Dart 验证再下沉 |
-| 环境噪声干扰 | 首次使用做"输入校准"；加噪声门限(noise gate) |
-| 和弦(多音)识别不准 | MVP 仅评单音旋律/和弦根音；多音评测走云端 CREPE（后期） |
-| iOS/Android 原生实现差异大 | 定义统一 Platform Channel 接口，两端各自实现 |
-| 低频(Low-G)延迟偏大 | 缓冲窗按最低频率设定；提示用户 High-G 配置体验更佳 |
+| 配乐声被麦克风收到 | 建议戴耳机；配乐默认低音量可开关 |
+| 滚动性能 | AnimationController + 只渲染屏幕内音符（虚拟化） |
+| 四线谱绘制复杂 | CustomPaint 或 4 Row 叠加，数字用 Text Widget |
+| 环境噪声干扰 | RMS 门限 + NCCF confidence 过滤 |
+| 和弦(多音)识别不准 | Chroma 模板匹配 + 根音加权 |
 
 ### 3.8 验证计划（MVP 前置 PoC）
 
@@ -342,6 +434,7 @@ LIFETIME > VIP_ALL > TRIAL > FREE
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.0 | 2026-06-26 | 初版；确定 Flutter + YIN 架构与三层音频引擎 |
+| v2.0 | 2026-07-01 | **音频引擎重写**：YIN→NCCF+预处理流水线；record→AudioWorklet 直采（Web）；新增 §3.7 整曲节奏模式（流水滚动跟弹）；更新 §3.3-3.6 架构与参数 |
 
 ---
 
@@ -350,6 +443,11 @@ LIFETIME > VIP_ALL > TRIAL > FREE
 - YIN 原始论文：de Cheveigné & Kawahara (2002), "YIN, a fundamental frequency estimator for speech and music"
 - CREPE：[Kim et al., ICASSP 2018](https://www.justinsalamon.com/uploads/4/3/9/4/4394963/kim_crepe_icassp_2018.pdf)
 - 算法基准：[lars76/pitch-benchmark](https://github.com/lars76/pitch-benchmark)
-- Flutter 插件：[flutter_pitch_detection](https://pub.dev/packages/flutter_pitch_detection)、[pitch_detector_plus](https://pub.dev/packages/pitch_detector_plus)
+- sevagh/pitch-detection (MPM/YIN 事实标准参考)：[GitHub](https://github.com/sevagh/pitch-detection)
+- cwilso/PitchDetect (Web ACF2+)：[GitHub](https://github.com/cwilso/PitchDetect)
+- 音高检测信号预处理（Rabiner 经典讲义）：[UCSB](https://web.ece.ucsb.edu/Faculty/Rabiner/ece259/)
+- 节奏游戏 Note Highway 设计：[Giant Bomb](https://giantbomb.com/wiki/Concepts/Note_Highway)
+- Yousician 虚拟指板视图：[yousician.com](https://yousician.com/blog/guitar-fretboard-learning-guide)
+- 尤克里里 TAB 谱读法：[liveukulele.com](https://liveukulele.com/tabs/how-to-read-tab/)
 - 低延迟讨论：[JUCE Forum](https://forum.juce.com/t/lowest-latency-real-time-pitch-detection/51741)
 - 原型 JS 库：[pitchfinder (Peter Johnson)](https://github.com/peterkwagner/pitchfinder)
