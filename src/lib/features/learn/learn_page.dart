@@ -7,13 +7,53 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/monetization/monetization_model.dart';
 import '../../core/monetization/paywall_sheet.dart';
 import '../../core/theme/app_theme.dart';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../core/theme/app_theme.dart';
 import 'course_detail_page.dart';
 import 'course_model.dart';
 
-/// 课程进度（本地，MVP；P2-4 上云）
+/// 课程进度（SharedPreferences 持久化）
 /// key = courseId, value = 已完成段落数
+class CourseProgressNotifier extends StateNotifier<Map<String, int>> {
+  CourseProgressNotifier() : super({}) {
+    _load();
+  }
+
+  static const _key = 'course_progress';
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString(_key);
+    if (json != null) {
+      final decoded = jsonDecode(json) as Map<String, dynamic>;
+      state = decoded.map((k, v) => MapEntry(k, v as int));
+    }
+  }
+
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, jsonEncode(state));
+  }
+
+  void complete(String courseId, int segments) {
+    state = {...state, courseId: segments};
+    _save();
+  }
+
+  bool isCompleted(String courseId, int totalSegments) {
+    return (state[courseId] ?? 0) >= totalSegments;
+  }
+}
+
 final courseProgressProvider =
-    StateProvider<Map<String, int>>((ref) => {});
+    StateNotifierProvider<CourseProgressNotifier, Map<String, int>>((ref) {
+  return CourseProgressNotifier();
+});
 
 class LearnPage extends ConsumerWidget {
   const LearnPage({super.key});

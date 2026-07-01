@@ -154,9 +154,10 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   label: _speed == 1.2 ? '🐇1.2x' : '🐇',
                   onTap: () => _setSpeed(_speed == 1.2 ? 1.0 : 1.2),
                 ),
+                // AB 循环暂未实现，用收藏替代
                 _ctrlBtn(
-                  label: '🔁',
-                  onTap: () => _tip('AB 循环 · 功能开发中'),
+                  label: '⭐',
+                  onTap: () => _tip('已收藏（功能完善中）'),
                 ),
               ],
             ),

@@ -48,10 +48,8 @@ class _CourseDetailPageState extends ConsumerState<CourseDetailPage> {
   }
 
   void _next() {
-    // 记录进度
-    final progress = Map<String, int>.from(ref.read(courseProgressProvider));
-    progress[widget.course.id] = _currentSegment + 1;
-    ref.read(courseProgressProvider.notifier).state = progress;
+    // 记录进度（持久化到 SharedPreferences）
+    ref.read(courseProgressProvider.notifier).complete(widget.course.id, _currentSegment + 1);
 
     if (_isLast) {
       // 课程完成，发经验

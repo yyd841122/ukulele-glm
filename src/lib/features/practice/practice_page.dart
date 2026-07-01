@@ -7,6 +7,7 @@ import 'metronome_page.dart';
 import 'chord_library_page.dart';
 import 'rhythm_practice_page.dart';
 import 'chord_transition_page.dart';
+import 'follow_score_page.dart';
 import '../../core/theme/app_theme.dart';
 
 class PracticePage extends StatelessWidget {
@@ -109,6 +110,23 @@ class PracticePage extends StatelessWidget {
                                 MaterialPageRoute(builder: (_) => const ChordTransitionPage())),
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ToolCard(
+                            icon: '🎤',
+                            title: '跟弹评分',
+                            subtitle: '单音/和弦/整曲',
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const FollowScorePage())),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // 占位保持对称（后续可加更多工具）
+                        const Expanded(child: SizedBox()),
                       ],
                     ),
                   ],

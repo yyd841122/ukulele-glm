@@ -166,12 +166,56 @@ class MePage extends ConsumerWidget {
                       title: const Text('设置'),
                       trailing: Text('乐器/音频校准 ›',
                           style: TextStyle(color: AppColors.text3, fontSize: 13)),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => Container(
+                            padding: const EdgeInsets.all(24),
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('⚙️ 设置', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                SizedBox(height: 16),
+                                Text('乐器类型：尤克里里（High-G）', style: TextStyle(fontSize: 14)),
+                                SizedBox(height: 8),
+                                Text('采样率：自动检测（Web 48000Hz）', style: TextStyle(fontSize: 14)),
+                                SizedBox(height: 8),
+                                Text('更多设置选项将在后续版本开放', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     const Divider(height: 1, indent: 16),
                     ListTile(
                       leading: const Text('💬'),
                       title: const Text('帮助与反馈'),
                       trailing: Text('›', style: TextStyle(color: AppColors.text3, fontSize: 13)),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => Container(
+                            padding: const EdgeInsets.all(24),
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('💬 帮助与反馈', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                SizedBox(height: 16),
+                                Text('常见问题：', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                                SizedBox(height: 8),
+                                Text('• 调音器没反应？请检查麦克风权限', style: TextStyle(fontSize: 13)),
+                                Text('• 识别不准？建议在安静环境使用', style: TextStyle(fontSize: 13)),
+                                Text('• 配乐干扰？建议佩戴耳机', style: TextStyle(fontSize: 13)),
+                                SizedBox(height: 16),
+                                Text('反馈邮箱：support@ukulele-app.com', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
