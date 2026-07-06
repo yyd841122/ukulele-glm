@@ -29,13 +29,20 @@ class MePage extends ConsumerWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 50, 16, 70),
-              decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+              decoration: const BoxDecoration(gradient: AppColors.sunsetGradient),
               child: Column(
                 children: [
-                  const CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Colors.white24,
-                    child: Text('🧑', style: TextStyle(fontSize: 36)),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 3),
+                      boxShadow: AppSpacing.shadowMedium,
+                    ),
+                    child: const CircleAvatar(
+                      radius: 36,
+                      backgroundColor: Colors.white24,
+                      child: Text('🧑', style: TextStyle(fontSize: 36)),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text('尤克里里爱好者',

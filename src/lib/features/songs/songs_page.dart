@@ -64,7 +64,8 @@ class SongsPage extends ConsumerWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppTheme.rBtn),
+                    borderRadius: BorderRadius.circular(AppSpacing.smallRadius),
+                    boxShadow: AppSpacing.shadowLow,
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: TextField(
@@ -93,20 +94,16 @@ class SongsPage extends ConsumerWidget {
                 return GestureDetector(
                   onTap: () =>
                       ref.read(songDifficultyProvider.notifier).state = c.diff,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: selected ? AppColors.orange : Colors.white,
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: const [
-                        BoxShadow(
-                            color: Color(0x1A000000),
-                            blurRadius: 6,
-                            offset: Offset(0, 1)),
-                      ],
-                    ),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: selected ? AppColors.brandGradient : null,
+                        color: selected ? null : Colors.white,
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: AppSpacing.shadowLow,
+                      ),
                     child: Text(c.label,
                         style: TextStyle(
                           color: selected ? Colors.white : AppColors.text2,
@@ -160,7 +157,7 @@ class _SongRow extends ConsumerWidget {
             MaterialPageRoute(builder: (_) => SongDetailPage(song: song)));
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         child: Row(
           children: [
             // 封面
@@ -174,7 +171,8 @@ class _SongRow extends ConsumerWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [song.color, song.colorLight]),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: AppSpacing.coloredShadow(song.color),
                   ),
                   alignment: Alignment.center,
                   child: Text(song.emoji, style: const TextStyle(fontSize: 24)),

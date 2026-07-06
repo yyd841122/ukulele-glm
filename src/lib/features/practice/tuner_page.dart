@@ -436,7 +436,20 @@ class _Dial extends StatelessWidget {
     // -50..+50 → -60..+60 度
     final angle = (cents * 1.2).clamp(-60.0, 60.0) * math.pi / 180;
 
-    return SizedBox(
+    return Container(
+      width: 280,
+      height: 280,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: (inTune ? AppColors.ok : AppColors.orange).withValues(alpha: 0.15),
+            blurRadius: 30,
+            spreadRadius: 5,
+          ),
+        ],
+      ),
+      child: SizedBox(
       width: 260,
       height: 260,
       child: Stack(
@@ -514,6 +527,7 @@ class _Dial extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }
