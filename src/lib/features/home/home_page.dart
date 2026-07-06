@@ -58,13 +58,8 @@ class HomePage extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppTheme.rCard),
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Color(0x1A000000),
-                        blurRadius: 12,
-                        offset: Offset(0, 2)),
-                  ],
+                  borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                  boxShadow: AppSpacing.shadowMedium,
                 ),
                 child: Row(
                   children: [
@@ -135,13 +130,13 @@ class HomePage extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Row(
                 children: [
-                  _quickTool(context, '🎼', '调音器', () => Navigator.push(context,
+                  _quickTool(context, '🎼', '调音器', AppColors.oceanGradient, () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const TunerPage()))),
-                  _quickTool(context, '📚', '曲谱库', () => Navigator.push(context,
+                  _quickTool(context, '📚', '曲谱库', AppColors.sunsetGradient, () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const SongsPage()))),
-                  _quickTool(context, '🎵', '和弦', () => Navigator.push(context,
+                  _quickTool(context, '🎵', '和弦', AppColors.dawnGradient, () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const ChordLibraryPage()))),
-                  _quickTool(context, '🎯', '练一练', () => Navigator.push(context,
+                  _quickTool(context, '🎯', '练一练', AppColors.islandGradient, () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const SongsPage()))),
                 ],
               ),
@@ -175,7 +170,8 @@ class HomePage extends ConsumerWidget {
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [s.color, s.colorLight]),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                                boxShadow: AppSpacing.coloredShadow(s.color),
                               ),
                               alignment: Alignment.bottomRight,
                               padding: const EdgeInsets.all(8),
@@ -203,7 +199,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _quickTool(BuildContext context, String emoji, String label, VoidCallback onTap) {
+  Widget _quickTool(BuildContext context, String emoji, String label, Gradient iconGradient, VoidCallback onTap) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -212,18 +208,13 @@ class HomePage extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(AppTheme.rCard),
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x1A000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 1)),
-            ],
+            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+            boxShadow: AppSpacing.shadowLow,
           ),
           child: Column(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 26)),
-              const SizedBox(height: 4),
+              GradientIconBg(icon: emoji, gradient: iconGradient, size: 40),
+              const SizedBox(height: 6),
               Text(label,
                   style: const TextStyle(fontSize: 11, color: AppColors.text2)),
             ],

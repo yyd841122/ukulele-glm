@@ -165,10 +165,8 @@ class _FeatureCard extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(AppTheme.rCard),
-          boxShadow: const [
-            BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 2)),
-          ],
+          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          boxShadow: AppSpacing.shadowHigh,
         ),
         child: isFeature
             ? Row(children: [
@@ -224,10 +222,8 @@ class _ToolCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.rCard),
-        boxShadow: const [
-          BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 2)),
-        ],
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        boxShadow: AppSpacing.shadowMedium,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
