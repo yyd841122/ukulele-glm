@@ -786,6 +786,303 @@ final List<PracticeSong> kSongs = [
       ]),
     ],
   ),
+  // ── You Are My Sunshine（公有领域）— C-G7-F ──
+  PracticeSong(
+    title: 'You Are My Sunshine',
+    artist: 'Traditional · 公有领域',
+    bpm: 90,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+      'Am': [2, 0, 0, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'You are my sunshine', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 2),
+      ]),
+      const PracticeLyric(text: 'My only sunshine', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 4),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 2), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: 'You make me happy', chords: [
+        PracticeChord(name: 'G7', position: 0),
+        PracticeChord(name: 'C', position: 4),
+      ], notes: [
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: 'When skies are gray', chords: [
+        PracticeChord(name: 'G7', position: 0),
+        PracticeChord(name: 'C', position: 5),
+      ], notes: [
+        PracticeNote(name: 'D', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 2),
+      ]),
+    ],
+  ),
+  // ── London Bridge（公有领域）— C-G-F ──
+  PracticeSong(
+    title: 'London Bridge',
+    artist: 'Nursery Rhyme · 公有领域',
+    bpm: 100,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G': [0, 2, 3, 2],
+      'Am': [2, 0, 0, 0],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'London Bridge is falling down', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 12),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 2), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: 'Falling down falling down', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'F', position: 12),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: 'London Bridge is falling down', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G', position: 12),
+      ], notes: [
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 2), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: 'My fair lady', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 友谊地久天长（Auld Lang Syne，公有领域）— C-F-G7 ──
+  PracticeSong(
+    title: '友谊地久天长',
+    artist: 'Auld Lang Syne · 公有领域',
+    bpm: 90,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+      'Am': [2, 0, 0, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'Should auld acquaintance be forgot', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'Am', position: 15),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 2),
+      ]),
+      const PracticeLyric(text: 'And never brought to mind', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 10),
+      ], notes: [
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'D', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 2),
+      ]),
+      const PracticeLyric(text: 'Should auld acquaintance be forgot', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G7', position: 15),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: 'And days of auld lang syne', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'G7', position: 4),
+        PracticeChord(name: 'C', position: 10),
+      ], notes: [
+        PracticeNote(name: 'F', beats: 2), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 2),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── Row Row Row Your Boat（公有领域）— C-G7 ──
+  PracticeSong(
+    title: 'Row Row Row',
+    artist: 'Nursery Rhyme · 公有领域',
+    bpm: 100,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'Row row row your boat', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+      ]),
+      const PracticeLyric(text: 'Gently down the stream', chords: [
+        PracticeChord(name: 'G7', position: 0),
+        PracticeChord(name: 'C', position: 10),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'F', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'C', beats: 2),
+      ]),
+      const PracticeLyric(text: 'Merrily merrily merrily merrily', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 9),
+        PracticeChord(name: 'G7', position: 18),
+      ], notes: [
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'E', beats: 1),
+      ]),
+      const PracticeLyric(text: 'Life is but a dream', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 新年好（Happy New Year，公有领域）— C-G7-F ──
+  PracticeSong(
+    title: '新年好',
+    artist: 'Happy New Year · 公有领域',
+    bpm: 100,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: 'Happy new year happy new year', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G7', position: 14),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'C', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 2), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 2), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'F', beats: 2),
+      ]),
+      const PracticeLyric(text: 'Happy new year to you all', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G7', position: 14),
+        PracticeChord(name: 'C', position: 22),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'A', beats: 2), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'D', beats: 1), PracticeNote(name: 'C', beats: 2),
+      ]),
+    ],
+  ),
+  // ── 康康舞曲（Offenbach，公有领域）— C-G7-F 高BPM ──
+  PracticeSong(
+    title: '康康舞曲',
+    artist: 'Offenbach · 公有领域',
+    bpm: 120,
+    chordFrets: {
+      'C': [0, 0, 0, 3],
+      'G7': [0, 2, 1, 2],
+      'F': [2, 0, 1, 0],
+      'Am': [2, 0, 0, 0],
+    },
+    lyrics: [
+      const PracticeLyric(text: '哒哒哒哒哒', chords: [
+        PracticeChord(name: 'C', position: 0),
+        PracticeChord(name: 'G7', position: 3),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 1),
+      ]),
+      const PracticeLyric(text: '哒哒哒哒哒', chords: [
+        PracticeChord(name: 'F', position: 0),
+        PracticeChord(name: 'C', position: 3),
+      ], notes: [
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'F', beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'C', octave: 5, beats: 1), PracticeNote(name: 'A', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'F', beats: 1),
+      ]),
+      const PracticeLyric(text: '哒哒哒哒哒', chords: [
+        PracticeChord(name: 'Am', position: 0),
+        PracticeChord(name: 'G7', position: 3),
+      ], notes: [
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'A', beats: 1), PracticeNote(name: 'G', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'D', beats: 1),
+        PracticeNote(name: 'E', beats: 1), PracticeNote(name: 'G', beats: 1),
+      ]),
+      const PracticeLyric(text: '哒哒哒！', chords: [
+        PracticeChord(name: 'C', position: 0),
+      ], notes: [
+        PracticeNote(name: 'C', beats: 1), PracticeNote(name: 'E', beats: 1),
+        PracticeNote(name: 'G', beats: 1), PracticeNote(name: 'C', octave: 5, beats: 2),
+      ]),
+    ],
+  ),
 ];
 PracticeSong? kSongsForPractice(String title) {
   for (final s in kSongs) {
