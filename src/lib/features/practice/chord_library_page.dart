@@ -151,7 +151,7 @@ class ChordLibraryPage extends ConsumerWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppTheme.rBtn),
+                    borderRadius: BorderRadius.circular(AppSpacing.smallRadius),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: TextField(
@@ -272,9 +272,8 @@ class _ChordCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.rCard),
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
         boxShadow: const [
-          BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 2)),
         ],
       ),
       child: Column(

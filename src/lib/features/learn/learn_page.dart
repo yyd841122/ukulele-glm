@@ -142,10 +142,8 @@ class _CourseCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(AppTheme.rCard),
-          boxShadow: const [
-            BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 2)),
-          ],
+          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          boxShadow: AppSpacing.shadowMedium,
         ),
         child: Row(
           children: [
@@ -158,9 +156,9 @@ class _CourseCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [course.color, Colors.white]),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(AppTheme.rCard),
-                  bottomLeft: Radius.circular(AppTheme.rCard),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(AppSpacing.cardRadius),
+                  bottomLeft: Radius.circular(AppSpacing.cardRadius),
                 ),
               ),
               alignment: Alignment.center,
