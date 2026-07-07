@@ -65,6 +65,11 @@ void playStrumByFrets({
   );
 }
 
+/// 预加载和弦采样（Web 端有效，移动端空操作）
+/// 在整曲弹唱开始前调用，加载歌曲用到的所有和弦采样。
+Future<void> preloadStrumSamples(List<String> chordNames) =>
+    preloadStrumSamplesImpl(chordNames);
+
 // ════════════════════════════════════════════════════════════════
 // 节奏型调度器
 // ════════════════════════════════════════════════════════════════

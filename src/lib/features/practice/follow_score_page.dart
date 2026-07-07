@@ -3648,6 +3648,11 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
       vsync: this,
       duration: Duration(milliseconds: (_totalDuration * 1000).round()),
     )..addListener(() => setState(() {}));
+    // 预加载歌曲用到的和弦采样（Web 端有效）
+    if (!widget.isSingleNote) {
+      final chordNames = widget.song.chordFrets.keys.toList();
+      preloadStrumSamples(chordNames);
+    }
     _startRound();
   }
 

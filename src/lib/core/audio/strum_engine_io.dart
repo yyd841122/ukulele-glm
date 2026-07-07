@@ -11,6 +11,8 @@ import 'dart:math' as math;
 import 'tone_player.dart';
 import 'strum_types.dart';
 
+Future<void> preloadStrumSamplesImpl(List<String> chordNames) async {}
+
 void playStrumImpl({
   required List<double> frequencies,
   required StrumDirection direction,
