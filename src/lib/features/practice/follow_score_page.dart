@@ -24,6 +24,7 @@ import '../../core/monetization/monetization_model.dart';
 import '../../core/monetization/paywall_sheet.dart';
 import '../../core/theme/app_theme.dart';
 import 'chord_library_page.dart' show ChordDiagram;
+import 'song_chord_play_page.dart';
 
 /// 练习模式
 enum PracticeMode { single, chord, song }
@@ -1236,19 +1237,26 @@ class _PracticeSongPickerState extends State<PracticeSongPicker> {
                 ),
               ),
               const SizedBox(height: 16),
-              // 开始按钮
+              // 开始按钮 → 和弦版竖屏 Chordify 式，单音版横屏高速路
               SizedBox(
                 width: double.infinity, height: 52,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => SongLandscapePage(
-                        song: widget.song,
-                        isSingleNote: _singleNote,
-                        accompaniment: _accompaniment,
-                        bpm: _bpm,
-                        rounds: _rounds,
-                      ),
+                      builder: (_) => _singleNote
+                        ? SongLandscapePage(
+                            song: widget.song,
+                            isSingleNote: true,
+                            accompaniment: _accompaniment,
+                            bpm: _bpm,
+                            rounds: _rounds,
+                          )
+                        : SongChordPlayPage(
+                            song: widget.song,
+                            accompaniment: _accompaniment,
+                            bpm: _bpm,
+                            rounds: _rounds,
+                          ),
                     ));
                   },
                   style: ElevatedButton.styleFrom(
@@ -1847,26 +1855,33 @@ class _FollowScorePageState extends ConsumerState<FollowScorePage> {
               ],
             ),
             const SizedBox(height: 12),
-            // 开始按钮 → 进入横屏整曲页面
+            // 开始按钮 → 和弦版竖屏，单音版横屏
             SizedBox(
               width: double.infinity, height: 50,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => SongLandscapePage(
-                      song: song,
-                      isSingleNote: _songSingleNote,
-                      accompaniment: _songAccompaniment,
-                      bpm: _songBpm,
-                      rounds: _songRounds,
-                    ),
+                    builder: (_) => _songSingleNote
+                      ? SongLandscapePage(
+                          song: song,
+                          isSingleNote: true,
+                          accompaniment: _songAccompaniment,
+                          bpm: _songBpm,
+                          rounds: _songRounds,
+                        )
+                      : SongChordPlayPage(
+                          song: song,
+                          accompaniment: _songAccompaniment,
+                          bpm: _songBpm,
+                          rounds: _songRounds,
+                        ),
                   ));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.orange, foregroundColor: Colors.white, elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                 ),
-                child: const Text('🎵 开始弹唱（横屏）',
+                child: Text('🎵 开始弹唱${_songSingleNote ? "（横屏）" : ""}',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
