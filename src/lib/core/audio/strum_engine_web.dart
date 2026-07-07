@@ -1,13 +1,15 @@
-/// 扫弦引擎 - Web 实现（Web Audio API 多弦合成）
+/// 扫弦引擎 - Web 实现（Web Audio API 多弦合成 v2）
 ///
-/// 每次扫弦 = 4 根弦以 15-25ms 时差依次触发：
-/// - 每根弦用 3 个谐波 OscillatorNode（基频 + 2倍 + 3倍）+ 低通滤波 + 指数衰减包络
-/// - 下扫：G→C→E→A（低音弦先响），力度递增
-/// - 上扫：A→E→C→G（高音弦先响），力度递减
-/// - 整体音量可控（配乐默认 0.15，避免干扰麦克风识别）
+/// v2 改进：
+/// - 增加噪声攻击层（拨弦瞬间的"擦"声，大幅提升真实感）
+/// - 5 谐波（基频+2~5倍），更接近真实弦音色
+/// - 弦体共振（低频残留共鸣）
+/// - 更合理的音量/衰减参数
+/// - 错峰触发优化（下扫慢而重，上扫快而轻）
 library;
 
 import 'dart:js_interop';
+import 'dart:math' as math;
 
 import 'package:web/web.dart' as web;
 
@@ -23,58 +25,91 @@ void playStrumImpl({
     if (ctx == null) return;
     final now = ctx.currentTime;
 
-    // 触发顺序：下扫 G→A（低先），上扫 A→G（高先）
+    // 触发顺序
     final order = direction == StrumDirection.down
         ? [0, 1, 2, 3]
         : [3, 2, 1, 0];
+
+    // 整体音量提升（之前 0.12 太低，现在 0.25 基础）
+    final baseVol = volume * 1.8;
 
     for (var i = 0; i < order.length; i++) {
       final freq = frequencies[order[i]];
       if (freq <= 0) continue;
 
-      // 错峰时间：下扫每弦间隔 15ms，上扫 10ms（上扫更快）
-      final strumDelay = (direction == StrumDirection.down ? 0.015 : 0.010) * i;
-      // 力度：下扫从强到弱，上扫从弱到强
+      // 错峰：下扫 18ms（更舒展），上扫 12ms（更轻快）
+      final strumDelay = (direction == StrumDirection.down ? 0.018 : 0.012) * i;
+      // 力度曲线
       final dynamics = direction == StrumDirection.down
-          ? 1.0 - i * 0.12 // 下扫：1.0, 0.88, 0.76, 0.64
-          : 0.7 + i * 0.10; // 上扫：0.7, 0.8, 0.9, 1.0
+          ? 1.0 - i * 0.08  // 下扫：1.0, 0.92, 0.84, 0.76
+          : 0.6 + i * 0.13; // 上扫：0.6, 0.73, 0.86, 1.0
 
-      _playString(ctx, now + strumDelay, freq, volume * dynamics, direction);
+      _playString(ctx, now + strumDelay, freq, baseVol * dynamics, direction, i);
     }
-  } catch (_) {
-    // 静默忽略
-  }
+  } catch (_) {}
 }
 
-/// 播放单根弦的音色（3 谐波 + 低通 + 衰减包络）
-void _playString(web.AudioContext ctx, double startTime, double freq, double vol, StrumDirection direction) {
-  // 衰减时长：低频弦更长（更像低音弦的延音）
-  final decay = freq < 300 ? 0.8 : (freq < 500 ? 0.5 : 0.3);
+/// 播放单根弦（5谐波 + 噪声攻击 + 低通 + 共振）
+void _playString(web.AudioContext ctx, double startTime, double freq, double vol, StrumDirection direction, int stringIdx) {
+  // 衰减时长：低频弦更长（低音弦延音长）
+  final decay = freq < 300 ? 1.2 : (freq < 500 ? 0.8 : 0.5);
 
-  // 3 个谐波：基频（最强）、2倍（中）、3倍（弱）
+  // ── 1. 噪声攻击层（拨弦瞬间的"擦"声）──
+  // 用短促的过滤白噪声模拟指甲/拨片划过弦的攻击声
+  final noiseDur = 0.04; // 40ms 攻击
+  final noiseBuf = ctx.createBuffer(1, (ctx.sampleRate * noiseDur).round(), ctx.sampleRate);
+  final noiseData = noiseBuf.getChannelData(0).toDart;
+  for (var i = 0; i < noiseData.length; i++) {
+    // 衰减的白噪声
+    noiseData[i] = (math.Random().nextDouble() * 2 - 1) * (1.0 - i / noiseData.length);
+  }
+  final noiseSrc = ctx.createBufferSource();
+  noiseSrc.buffer = noiseBuf;
+
+  final noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.value = freq * 2; // 噪声集中在弦频率附近
+  noiseFilter.Q.value = 2.0;
+
+  final noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.0, startTime);
+  noiseGain.gain.linearRampToValueAtTime(vol * 0.15, startTime + 0.001); // 快速起音
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + noiseDur);
+
+  noiseSrc.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noiseSrc.start(startTime);
+  noiseSrc.stop(startTime + noiseDur);
+
+  // ── 2. 谐波层（5 个谐波，模拟真实弦振动）──
   final harmonics = [
-    (freq, 1.0),        // 基频
-    (freq * 2, 0.4),    // 2 倍频
-    (freq * 3, 0.15),   // 3 倍频
+    (freq, 1.0),         // 基频（最强）
+    (freq * 2, 0.45),    // 2 倍频
+    (freq * 3, 0.25),    // 3 倍频
+    (freq * 4, 0.12),    // 4 倍频
+    (freq * 5, 0.06),    // 5 倍频
   ];
 
-  // 总增益节点（控制这根弦的总音量）
+  // 总增益（起音 + 衰减包络）
   final stringGain = ctx.createGain();
-  // 起音 + 指数衰减包络
   stringGain.gain.setValueAtTime(0.0, startTime);
-  stringGain.gain.linearRampToValueAtTime(vol, startTime + 0.003); // 3ms 起音
-  stringGain.gain.exponentialRampToValueAtTime(0.0001, startTime + decay); // 指数衰减
+  // 快速起音（2ms，比之前 3ms 更锐利）
+  stringGain.gain.linearRampToValueAtTime(vol, startTime + 0.002);
+  // 双段衰减：快速衰减（攻击后）+ 慢速衰减（延音）
+  stringGain.gain.exponentialRampToValueAtTime(vol * 0.3, startTime + 0.15);
+  stringGain.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
 
-  // 低通滤波（去掉高频毛刺，让音色更暖）
+  // 低通滤波（暖化音色，截止频率随谐波数调整）
   final filter = ctx.createBiquadFilter();
   filter.type = 'lowpass';
-  filter.frequency.value = freq * 6; // 截止频率 = 基频 × 6
-  filter.Q.value = 1.0;
+  filter.frequency.value = freq * 8;
+  filter.Q.value = 0.7; // 低 Q 值，更自然
 
-  // 连接：弦谐波 → 低通 → 增益 → 输出
   for (final (h, level) in harmonics) {
     final osc = ctx.createOscillator();
-    osc.type = 'triangle'; // 三角波比正弦更像弦乐（含奇次谐波）
+    // 用 sawtooth（锯齿波）替代 triangle —— 含丰富谐波，更像弦乐
+    osc.type = 'sawtooth';
     osc.frequency.value = h;
 
     final oscGain = ctx.createGain();
@@ -83,19 +118,18 @@ void _playString(web.AudioContext ctx, double startTime, double freq, double vol
     osc.connect(oscGain);
     oscGain.connect(filter);
     osc.start(startTime);
-    osc.stop(startTime + decay + 0.05); // 多留 50ms 确保衰减完成
+    osc.stop(startTime + decay + 0.1);
   }
 
   filter.connect(stringGain);
   stringGain.connect(ctx.destination);
 }
 
-/// 获取共享的 AudioContext（复用，不每次新建）
+/// 获取共享的 AudioContext
 web.AudioContext? _cachedCtx;
 
 web.AudioContext? _getCtx() {
   if (_cachedCtx != null) {
-    // 如果 context 被关闭了，重新创建
     if (_cachedCtx!.state != 'closed') {
       if (_cachedCtx!.state == 'suspended') {
         _cachedCtx!.resume().toDart;

@@ -132,7 +132,7 @@ class StrumPatternScheduler {
   StrumPatternScheduler({
     required this.bpm,
     required this.pattern,
-    this.volume = 0.15,
+    this.volume = 0.20,
     this.onStrum,
   });
 
