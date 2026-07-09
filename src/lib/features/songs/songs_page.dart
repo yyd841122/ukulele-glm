@@ -13,15 +13,39 @@ import '../../core/monetization/paywall_sheet.dart';
 import '../../core/theme/app_theme.dart';
 import 'song_model.dart';
 import 'song_detail_page.dart';
+import 'song_editor_page.dart';
+import 'user_songs_storage.dart';
+import '../practice/follow_score_page.dart' hide kSongs;
+import '../practice/song_chord_play_page.dart';
+import 'chordpro_parser.dart';
 
 final songSearchProvider = StateProvider<String>((ref) => '');
 final songDifficultyProvider = StateProvider<SongDifficulty?>((ref) => null);
 
-class SongsPage extends ConsumerWidget {
+class SongsPage extends ConsumerStatefulWidget {
   const SongsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SongsPage> createState() => _SongsPageState();
+}
+
+class _SongsPageState extends ConsumerState<SongsPage> {
+  List<UserSong> _userSongs = [];
+  bool _loadingUserSongs = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserSongs();
+  }
+
+  Future<void> _loadUserSongs() async {
+    final songs = await UserSongsStorage.loadAll();
+    if (mounted) setState(() { _userSongs = songs; _loadingUserSongs = false; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final keyword = ref.watch(songSearchProvider);
     final filter = ref.watch(songDifficultyProvider);
 
@@ -42,6 +66,17 @@ class SongsPage extends ConsumerWidget {
     ];
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const SongEditorPage()));
+          if (result == true) _loadUserSongs();
+        },
+        backgroundColor: AppColors.orange,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('新建曲谱', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
       body: Column(
         children: [
           // 渐变头部
@@ -117,17 +152,114 @@ class SongsPage extends ConsumerWidget {
           ),
           // 列表
           Expanded(
-            child: list.isEmpty
+            child: list.isEmpty && _userSongs.isEmpty
                 ? const Center(
                     child: Text('没有匹配的曲谱',
                         style: TextStyle(color: AppColors.text3)))
                 : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemCount: list.length,
-                    itemBuilder: (_, i) => _SongRow(song: list[i]),
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: (_userSongs.isEmpty ? 0 : _userSongs.length + 1) + list.length,
+                    itemBuilder: (_, i) {
+                      // 用户曲谱区
+                      if (_userSongs.isNotEmpty) {
+                        if (i == 0) {
+                          return _buildUserSongsHeader();
+                        }
+                        if (i <= _userSongs.length) {
+                          return _buildUserSongRow(_userSongs[i - 1]);
+                        }
+                        return _SongRow(song: list[i - _userSongs.length - 1]);
+                      }
+                      return _SongRow(song: list[i]);
+                    },
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUserSongsHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(children: [
+        const Text('📝 我的曲谱', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.orange)),
+        const Spacer(),
+        Text('${_userSongs.length} 首', style: const TextStyle(color: AppColors.text3, fontSize: 12)),
+      ]),
+    );
+  }
+
+  Widget _buildUserSongRow(UserSong userSong) {
+    return Dismissible(
+      key: ValueKey(userSong.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: AppColors.err,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      onDismissed: (_) async {
+        await UserSongsStorage.delete(userSong.id);
+        setState(() => _userSongs.removeWhere((s) => s.id == userSong.id));
+      },
+      child: InkWell(
+        onTap: () {
+          // 解析并进入和弦弹唱
+          final result = parseChordPro(userSong.chordPro);
+          if (result.song != null) {
+            Navigator.push(context, MaterialPageRoute(
+              builder: (_) => SongChordPlayPage(
+                song: result.song!,
+                accompaniment: true,
+                bpm: userSong.bpm,
+                rounds: 1,
+              ),
+            ));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result.error ?? '解析失败')),
+            );
+          }
+        },
+        onLongPress: () async {
+          // 长按编辑
+          final res = await Navigator.push(context, MaterialPageRoute(
+            builder: (_) => SongEditorPage(existing: userSong)));
+          if (res == true) _loadUserSongs();
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+            boxShadow: AppSpacing.shadowLow,
+            border: Border.all(color: AppColors.orange.withValues(alpha: 0.2), width: 1),
+          ),
+          child: Row(children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                gradient: AppColors.brandGradient,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(child: Text('📝', style: TextStyle(fontSize: 20))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(userSong.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text('${userSong.artist} · ${userSong.bpm}BPM',
+                    style: const TextStyle(fontSize: 11, color: AppColors.text2)),
+              ],
+            )),
+            const Icon(Icons.music_note, color: AppColors.orange, size: 20),
+          ]),
+        ),
       ),
     );
   }
