@@ -4,10 +4,11 @@
 /// - 难度筛选标签：全部 / 基础 / 进阶
 /// - 和弦卡片：和弦名、难度、自绘指法图（4 弦 × 5 品网格）
 /// - 指法数组含义：[G, C, E, A]，值 0=空弦(○)，1-5=按品，-1=不弹(×)
-/// - 试听按钮：调用 SystemSound.click 占位（web 无声）
+/// - 试听按钮：播放和弦拨弦音色
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/audio/tone_player.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -316,11 +317,11 @@ class _ChordCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          // 试听按钮
+          // 试听按钮：播放和弦音色
           Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
-              onTap: () => SystemSound.play(SystemSoundType.click),
+              onTap: () => playTone(name: chord.name, type: ToneType.strum),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

@@ -187,7 +187,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
             child: Column(
               children: [
                 const Text(
-                  '🟡 免费用户每日可评分 3 次 · 今日剩 0 次',
+                  '🎵 选择练习模式，跟着节奏弹唱',
                   style: TextStyle(fontSize: 11, color: AppColors.text3),
                 ),
                 const SizedBox(height: 8),

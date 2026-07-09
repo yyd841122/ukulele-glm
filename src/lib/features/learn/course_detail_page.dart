@@ -16,6 +16,7 @@ import '../../core/theme/app_theme.dart';
 import '../practice/chord_library_page.dart' show ChordDiagram;
 import '../practice/tuner_page.dart';
 import '../practice/chord_transition_page.dart';
+import '../practice/follow_score_page.dart' hide kSongs;
 import '../songs/song_detail_page.dart';
 import '../songs/song_model.dart';
 import 'course_model.dart';
@@ -289,8 +290,10 @@ class _CourseDetailPageState extends ConsumerState<CourseDetailPage> {
         }
       };
     } else {
-      label = '▶ 开始练习';
-      onTap = () {};
+      // 默认：跳转到跟弹评分页做实际练习
+      label = '🎤 开始跟弹练习';
+      onTap = () => Navigator.push(context,
+          MaterialPageRoute(builder: (_) => const FollowScorePage()));
     }
     return Center(
       child: ElevatedButton.icon(

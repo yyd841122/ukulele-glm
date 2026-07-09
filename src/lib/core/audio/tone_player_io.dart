@@ -17,7 +17,9 @@ void playToneImpl({
     final dir = type == ToneType.sine ? 'tones' : 'strum';
     final prefix = type == ToneType.sine ? 'sine_' : 'strum_';
     // 和弦文件名不含八度（如 strum_C.wav），单音含八度（如 sine_C4.wav）
-    final isChord = RegExp(r'[m7Maj]').hasMatch(name);
+    // 判断：纯单音 = 1-2 个字符（C/C#/D...），和弦 = 含 m/7/sus/dim/maj/aug/add
+    final isChord = name.contains(RegExp(r'(m$|maj|min|sus|dim|aug|add|7|9|11|13)')) ||
+        (name.length > 2 && !name.contains('#'));
     final fileName = isChord ? '$prefix$name.wav' : '$prefix$name$octave.wav';
     await _player.stop();
     await _player.play(AssetSource('sounds/$dir/$fileName'));
