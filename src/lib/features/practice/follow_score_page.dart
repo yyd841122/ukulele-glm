@@ -3703,16 +3703,8 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
     if (widget.isSingleNote) {
       for (final note in widget.song.noteSequence) {
         final dur = note.beats * beatSec;
-        int si = 0, fr = 0;
-        // 简化品数推算（C4-C5 常用位置）
-        if (note.name == 'C' && note.octave == 4) { si = 2; fr = 0; }
-        else if (note.name == 'D') { si = 2; fr = 2; }
-        else if (note.name == 'E') { si = 1; fr = 0; }
-        else if (note.name == 'F') { si = 1; fr = 1; }
-        else if (note.name == 'G' && note.octave == 4) { si = 3; fr = 0; }
-        else if (note.name == 'A') { si = 0; fr = 0; }
-        else if (note.name == 'B') { si = 0; fr = 2; }
-        else if (note.name == 'C' && note.octave == 5) { si = 0; fr = 3; }
+        // 音名+八度 → 弦索引+品数（尤克里里标准调音 GCEA）
+        final (si, fr) = _noteToFret(note.name, note.octave);
         _events.add(_TimelineEvent(timeSec: time, durationSec: dur, name: note.name, octave: note.octave, stringIdx: si, fret: fr));
         time += dur;
       }
@@ -3744,6 +3736,33 @@ class _SongLandscapePageState extends ConsumerState<SongLandscapePage>
       }
     }
     _totalDuration = time + beatSec * 2;
+  }
+
+  /// 音名+八度 → (弦索引, 品数)
+  /// 尤克里里标准调音：G4(4弦) C4(3弦) E4(2弦) A4(1弦)
+  /// 返回最适合按弦的位置（优先低把位/空弦）
+  (int, int) _noteToFret(String name, int octave) {
+    // MIDI 值：C4=60, C#4=61, D4=62...
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    final semitone = names.indexOf(name);
+    if (semitone < 0) return (0, 0);
+    final midi = (octave + 1) * 12 + semitone;
+
+    // 4 根弦的空弦 MIDI：G4=67, C4=60, E4=64, A4=69
+    // 弦索引：0=A(1弦), 1=E(2弦), 2=C(3弦), 3=G(4弦)
+    const stringMidi = [69, 64, 60, 67]; // A, E, C, G
+
+    // 找最接近的弦+品（品数最小，优先空弦）
+    int bestStr = 0, bestFret = 99;
+    for (var s = 0; s < 4; s++) {
+      final fret = midi - stringMidi[s];
+      if (fret >= 0 && fret <= 12 && fret < bestFret) {
+        bestFret = fret;
+        bestStr = s;
+      }
+    }
+    if (bestFret == 99) return (0, 0); // 超出范围
+    return (bestStr, bestFret);
   }
 
   void _startRound() {

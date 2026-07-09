@@ -410,7 +410,7 @@ class _TunerPageState extends ConsumerState<TunerPage> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    '点击后允许使用麦克风 · 用 MPM 算法实时识别音高',
+                    '点击后允许使用麦克风 · 用 NCCF 算法实时识别音高',
                     style: TextStyle(color: AppColors.text3, fontSize: 11),
                   ),
                 ],

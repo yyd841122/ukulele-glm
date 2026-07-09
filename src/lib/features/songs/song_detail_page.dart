@@ -193,33 +193,30 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    // 整曲弹唱（横屏）
+                    // 整曲弹唱
                     Expanded(
                       child: SizedBox(
                         height: 48,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // 从曲谱库标题匹配练习歌曲
-                            final practiceSong = kSongsForPractice(widget.song.title);
-                            if (practiceSong != null) {
+                        child: Builder(builder: (context) {
+                          final practiceSong = kSongsForPractice(widget.song.title);
+                          final supported = practiceSong != null;
+                          return ElevatedButton(
+                            onPressed: supported ? () {
                               Navigator.push(context, MaterialPageRoute(
                                 builder: (_) => PracticeSongPicker(song: practiceSong),
                               ));
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('这首歌曲暂不支持整曲弹唱，敬请期待')),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.teal,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                          ),
-                          child: const Text('🎵 整曲弹唱',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                        ),
+                            } : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: supported ? AppColors.teal : Colors.grey.shade300,
+                              foregroundColor: Colors.white,
+                              disabledForegroundColor: Colors.white70,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                            ),
+                            child: Text(supported ? '🎵 整曲弹唱' : '🎵 暂不支持',
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: supported ? Colors.white : Colors.grey)),
+                          );
+                        }),
                       ),
                     ),
                     const SizedBox(width: 10),

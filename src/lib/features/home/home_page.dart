@@ -93,8 +93,8 @@ class HomePage extends ConsumerWidget {
                     // 周打卡
                     Row(
                       children: List.generate(7, (i) {
-                        final done = i < 6;
-                        final now = i == 6;
+                        final done = i < streak;
+                        final now = i == streak - 1 && streak > 0;
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 3),
                           width: 28,
