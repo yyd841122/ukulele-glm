@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/audio/strum_engine.dart';
 import '../../core/audio/tone_player.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -321,7 +322,7 @@ class _ChordCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
-              onTap: () => playTone(name: chord.name, type: ToneType.strum),
+              onTap: () => playStrumByFrets(frets: chord.frets, volume: 0.25),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
