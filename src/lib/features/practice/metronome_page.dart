@@ -55,13 +55,17 @@ class MetronomeNotifier extends StateNotifier<MetronomeState> {
 
   MetronomeNotifier() : super(const MetronomeState());
 
+  Timer? _debounceTimer;
+
   /// 设置 BPM（限定 40-240）
+  /// Slider 拖动时频繁调用，用 debounce 避免频繁重建 Timer
   void setBpm(int v) {
     final clamped = v.clamp(40, 240);
     state = state.copyWith(bpm: clamped);
-    if (state.isPlaying) {
-      _restart();
-    }
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 150), () {
+      if (state.isPlaying) _restart();
+    });
   }
 
   /// 设置拍号
@@ -113,6 +117,7 @@ class MetronomeNotifier extends StateNotifier<MetronomeState> {
   @override
   void dispose() {
     _timer?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 }

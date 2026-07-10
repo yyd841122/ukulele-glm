@@ -8,6 +8,7 @@ import 'chord_library_page.dart';
 import 'rhythm_practice_page.dart';
 import 'chord_transition_page.dart';
 import 'follow_score_page.dart';
+import '../songs/songs_page.dart';
 import '../../core/theme/app_theme.dart';
 
 class PracticePage extends StatelessWidget {
@@ -125,8 +126,15 @@ class PracticePage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // 占位保持对称（后续可加更多工具）
-                        const Expanded(child: SizedBox()),
+                        Expanded(
+                          child: _ToolCard(
+                            icon: '🎼',
+                            title: '曲谱库',
+                            subtitle: '77首曲谱',
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => const SongsPage())),
+                          ),
+                        ),
                       ],
                     ),
                   ],
